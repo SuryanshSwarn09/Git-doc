@@ -4,7 +4,9 @@ import {
   PrinterIcon, 
   ColumnsIcon, 
   LayoutIcon, 
-  CheckIcon 
+  CheckIcon,
+  HeaderIcon,
+  FooterIcon,
 } from './Icons.jsx';
 
 /**
@@ -13,6 +15,7 @@ import {
  * - Paper size: Letter vs A4
  * - Margins: Normal vs Compact vs Wide
  * - Heading numbering: Hierarchical CSS counters (1.0, 1.1, 1.2)
+ * - Running Header & Footer: Custom text, date stamp, dynamic page numbering
  *
  * @param {Object} props
  * @param {boolean} props.isOpen
@@ -84,7 +87,9 @@ export default function PrintModal({
                 options.columns === preset.columns &&
                 options.paperSize === preset.paperSize &&
                 options.margins === preset.margins &&
-                options.numberedHeadings === preset.numberedHeadings
+                options.numberedHeadings === preset.numberedHeadings &&
+                options.showHeader === preset.showHeader &&
+                options.showFooter === preset.showFooter
               );
               return (
                 <button
@@ -208,6 +213,105 @@ export default function PrintModal({
           </div>
         </div>
 
+        {/* Running Headers & Footers Section */}
+        <div className="print-modal-section">
+          <label className="print-section-label">
+            <HeaderIcon size={14} className="section-label-icon" />
+            Running Headers &amp; Footers
+          </label>
+          <div className="print-hf-container">
+            {/* Header Control */}
+            <div className="print-hf-card">
+              <div className="print-hf-card-header">
+                <div className="print-toggle-text">
+                  <span className="print-toggle-title">Running Header</span>
+                  <span className="print-toggle-subtitle">
+                    Appears across the top margin of every printed page.
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  className={`print-switch-btn ${options.showHeader ? 'checked' : ''}`}
+                  onClick={() => handleOptionChange('showHeader', !options.showHeader)}
+                  role="switch"
+                  aria-checked={options.showHeader}
+                  aria-label="Toggle running header"
+                >
+                  <span className="print-switch-thumb" />
+                </button>
+              </div>
+              {options.showHeader && (
+                <div className="print-hf-input-wrapper">
+                  <input
+                    type="text"
+                    className="print-text-input"
+                    placeholder="e.g. Antigravity Research Group • Confidential"
+                    value={options.headerText || ''}
+                    maxLength={120}
+                    onChange={(e) => handleOptionChange('headerText', e.target.value)}
+                    aria-label="Running header text"
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Footer Control */}
+            <div className="print-hf-card">
+              <div className="print-hf-card-header">
+                <div className="print-toggle-text">
+                  <span className="print-toggle-title">Running Footer</span>
+                  <span className="print-toggle-subtitle">
+                    Appears across the bottom margin with page numbers.
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  className={`print-switch-btn ${options.showFooter ? 'checked' : ''}`}
+                  onClick={() => handleOptionChange('showFooter', !options.showFooter)}
+                  role="switch"
+                  aria-checked={options.showFooter}
+                  aria-label="Toggle running footer"
+                >
+                  <span className="print-switch-thumb" />
+                </button>
+              </div>
+              {options.showFooter && (
+                <div className="print-hf-input-wrapper">
+                  <input
+                    type="text"
+                    className="print-text-input"
+                    placeholder="e.g. Confidential & Proprietary"
+                    value={options.footerText || ''}
+                    maxLength={120}
+                    onChange={(e) => handleOptionChange('footerText', e.target.value)}
+                    aria-label="Running footer text"
+                  />
+                  <div className="print-hf-suboptions">
+                    <label className="print-checkbox-label">
+                      <input
+                        type="checkbox"
+                        checked={options.showPageNumbers}
+                        onChange={(e) => handleOptionChange('showPageNumbers', e.target.checked)}
+                        className="print-checkbox"
+                      />
+                      <span>Dynamic Page Numbers (Page X)</span>
+                    </label>
+                    <label className="print-checkbox-label">
+                      <input
+                        type="checkbox"
+                        checked={options.showDate}
+                        onChange={(e) => handleOptionChange('showDate', e.target.checked)}
+                        className="print-checkbox"
+                      />
+                      <span>Print Date Stamp</span>
+                    </label>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
         {/* Live Summary Bar */}
         <div className="print-summary-bar">
           <span className="summary-tag">
@@ -225,6 +329,22 @@ export default function PrintModal({
           <span className="summary-tag">
             {options.numberedHeadings ? 'Numbered Headings ON' : 'Unnumbered Headings'}
           </span>
+          {options.showHeader && (
+            <>
+              <span className="summary-dot">&bull;</span>
+              <span className="summary-tag">
+                Header: {options.headerText ? `"${options.headerText.slice(0, 18)}${options.headerText.length > 18 ? '...' : ''}"` : 'Active'}
+              </span>
+            </>
+          )}
+          {options.showFooter && (
+            <>
+              <span className="summary-dot">&bull;</span>
+              <span className="summary-tag">
+                Footer {options.showPageNumbers ? '(+ Pages)' : ''}
+              </span>
+            </>
+          )}
         </div>
 
         {/* Modal Actions */}
