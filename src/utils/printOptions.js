@@ -24,6 +24,12 @@ export const PRINT_PRESETS = {
     paperSize: 'letter',
     margins: 'normal',
     numberedHeadings: false,
+    showHeader: false,
+    headerText: '',
+    showFooter: false,
+    footerText: '',
+    showPageNumbers: true,
+    showDate: false,
   },
   academic: {
     id: 'academic',
@@ -33,6 +39,12 @@ export const PRINT_PRESETS = {
     paperSize: 'a4',
     margins: 'compact',
     numberedHeadings: true,
+    showHeader: true,
+    headerText: 'Academic Paper • Draft',
+    showFooter: true,
+    footerText: '',
+    showPageNumbers: true,
+    showDate: true,
   },
   formal: {
     id: 'formal',
@@ -42,6 +54,12 @@ export const PRINT_PRESETS = {
     paperSize: 'a4',
     margins: 'normal',
     numberedHeadings: true,
+    showHeader: true,
+    headerText: 'Technical Report',
+    showFooter: true,
+    footerText: 'Confidential',
+    showPageNumbers: true,
+    showDate: true,
   },
 };
 
@@ -50,6 +68,12 @@ export const DEFAULT_PRINT_OPTIONS = {
   paperSize: 'letter',
   margins: 'normal',
   numberedHeadings: false,
+  showHeader: false,
+  headerText: '',
+  showFooter: false,
+  footerText: '',
+  showPageNumbers: true,
+  showDate: false,
   preset: 'clean',
 };
 
@@ -69,6 +93,12 @@ export function validatePrintOptions(options = {}) {
     ? options.margins 
     : 'normal';
   const numberedHeadings = Boolean(options.numberedHeadings);
+  const showHeader = Boolean(options.showHeader);
+  const headerText = typeof options.headerText === 'string' ? options.headerText.slice(0, 120) : '';
+  const showFooter = Boolean(options.showFooter);
+  const footerText = typeof options.footerText === 'string' ? options.footerText.slice(0, 120) : '';
+  const showPageNumbers = options.showPageNumbers !== undefined ? Boolean(options.showPageNumbers) : true;
+  const showDate = Boolean(options.showDate);
   const preset = options.preset && PRINT_PRESETS[options.preset] 
     ? options.preset 
     : (options.preset ? 'custom' : DEFAULT_PRINT_OPTIONS.preset);
@@ -78,6 +108,12 @@ export function validatePrintOptions(options = {}) {
     paperSize,
     margins,
     numberedHeadings,
+    showHeader,
+    headerText,
+    showFooter,
+    footerText,
+    showPageNumbers,
+    showDate,
     preset,
   };
 }
