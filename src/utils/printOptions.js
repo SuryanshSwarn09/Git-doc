@@ -118,6 +118,31 @@ export function validatePrintOptions(options = {}) {
   };
 }
 
+export const MARGIN_SPECS = {
+  normal: { top: 15, right: 15, bottom: 20, left: 15 },
+  compact: { top: 10, right: 10, bottom: 12, left: 10 },
+  wide: { top: 25, right: 25, bottom: 25, left: 25 },
+};
+
+/**
+ * Computes dynamic @page margins accounting for running headers and footers.
+ *
+ * @param {'normal' | 'compact' | 'wide'} marginsKey
+ * @param {boolean} showHeader
+ * @param {boolean} showFooter
+ * @returns {string} Margin CSS string, e.g. "22mm 15mm 24mm 15mm"
+ */
+export function getComputedMargins(marginsKey, showHeader, showFooter) {
+  const base = MARGIN_SPECS[marginsKey] || MARGIN_SPECS.normal;
+  const top = showHeader 
+    ? (marginsKey === 'compact' ? 18 : (marginsKey === 'wide' ? 30 : 22)) 
+    : base.top;
+  const bottom = showFooter 
+    ? (marginsKey === 'compact' ? 18 : (marginsKey === 'wide' ? 32 : 24)) 
+    : base.bottom;
+  return `${top}mm ${base.right}mm ${bottom}mm ${base.left}mm`;
+}
+
 /**
  * Generates dynamic @page and column styling CSS for the customized print job.
  * 
@@ -127,14 +152,28 @@ export function validatePrintOptions(options = {}) {
 export function generatePrintCSS(options) {
   const valid = validatePrintOptions(options);
   const pageSize = PAPER_SIZE_CSS[valid.paperSize] || 'letter';
-  const marginValue = MARGIN_CSS[valid.margins] || MARGIN_CSS.normal;
+  const marginValue = getComputedMargins(valid.margins, valid.showHeader, valid.showFooter);
   const columns = valid.columns;
+
+  let pageMediaCounters = '';
+  if (valid.showFooter && valid.showPageNumbers) {
+    pageMediaCounters = `
+@page {
+  @bottom-right {
+    content: "Page " counter(page);
+    font-size: 8.5pt;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #64748b;
+  }
+}`;
+  }
 
   return `
 @page {
   size: ${pageSize};
   margin: ${marginValue};
 }
+${pageMediaCounters}
 @media print {
   .preview-output {
     column-count: ${columns} !important;
