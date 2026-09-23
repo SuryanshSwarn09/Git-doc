@@ -368,6 +368,12 @@ function App() {
         paperSize: preset.paperSize,
         margins: preset.margins,
         numberedHeadings: preset.numberedHeadings,
+        showHeader: preset.showHeader,
+        headerText: preset.headerText,
+        showFooter: preset.showFooter,
+        footerText: preset.footerText,
+        showPageNumbers: preset.showPageNumbers,
+        showDate: preset.showDate,
         preset: presetKey,
       });
     }
@@ -376,11 +382,21 @@ function App() {
   const handleExecutePrint = () => {
     setActiveModal(null);
 
-    // 1. Toggle data-print-numbered attribute on body for hierarchical CSS counter numbering
+    // 1. Toggle data attributes on body for hierarchical CSS counter numbering & header/footer
     if (printOptions.numberedHeadings) {
       document.body.setAttribute('data-print-numbered', 'true');
     } else {
       document.body.removeAttribute('data-print-numbered');
+    }
+    if (printOptions.showHeader) {
+      document.body.setAttribute('data-print-header', 'true');
+    } else {
+      document.body.removeAttribute('data-print-header');
+    }
+    if (printOptions.showFooter) {
+      document.body.setAttribute('data-print-footer', 'true');
+    } else {
+      document.body.removeAttribute('data-print-footer');
     }
     document.documentElement.style.setProperty('--print-cols', String(printOptions.columns));
 
@@ -396,6 +412,8 @@ function App() {
     // 3. Clean up dynamic print styles on print completion or cancellation
     const cleanupPrint = () => {
       document.body.removeAttribute('data-print-numbered');
+      document.body.removeAttribute('data-print-header');
+      document.body.removeAttribute('data-print-footer');
       document.documentElement.style.removeProperty('--print-cols');
       const styleEl = document.getElementById('dynamic-print-page');
       if (styleEl) {
