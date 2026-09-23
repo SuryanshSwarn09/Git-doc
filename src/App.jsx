@@ -632,6 +632,19 @@ function App() {
           <div className="pane-header">
             <span className="pane-title">Live Preview</span>
           </div>
+
+          {/* Running Print Header */}
+          {printOptions.showHeader && (
+            <div className="print-running-header" aria-hidden="true">
+              <span className="print-header-text">{printOptions.headerText || 'Document'}</span>
+              {printOptions.showDate && (
+                <span className="print-header-date">
+                  {new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+                </span>
+              )}
+            </div>
+          )}
+
           <div 
             ref={previewRef}
             className="preview-output" 
@@ -639,6 +652,18 @@ function App() {
             onClick={handlePreviewClick}
             dangerouslySetInnerHTML={{ __html: parsedHTML }} 
           />
+
+          {/* Running Print Footer */}
+          {printOptions.showFooter && (
+            <div className="print-running-footer" aria-hidden="true">
+              <span className="print-footer-text">{printOptions.footerText}</span>
+              {printOptions.showPageNumbers && (
+                <span className="print-footer-page">
+                  Page <span className="print-page-counter" />
+                </span>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
