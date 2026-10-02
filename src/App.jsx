@@ -578,7 +578,7 @@ function App() {
   const stats = useMemo(() => getDocumentStats(markdown), [markdown]);
 
   return (
-    <div className="app-container">
+    <div className={`app-container ${isZenMode ? 'zen-mode-active' : ''}`}>
       {isZenMode && (
         <button
           type="button"
