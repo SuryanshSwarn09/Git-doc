@@ -579,6 +579,18 @@ function App() {
 
   return (
     <div className="app-container">
+      {isZenMode && (
+        <button
+          type="button"
+          className="zen-exit-pill"
+          onClick={() => setIsZenMode(false)}
+          title="Exit Zen Mode (Esc)"
+          aria-label="Exit Zen Mode"
+        >
+          <ZenExitIcon size={14} />
+          <span>Exit Zen (Esc)</span>
+        </button>
+      )}
       
       <div className="top-bar">
         <div className="view-mode-selector" role="radiogroup" aria-label="View Mode">
