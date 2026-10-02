@@ -2317,51 +2317,50 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 7px;
-  height: 36px;
-  padding: 0 13px;
-  border-radius: 9px;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: var(--radius);
   font-family: inherit;
-  font-size: 0.84rem;
-  font-weight: 600;
-  line-height: 1;
+  font-size: 0.82rem;
+  font-weight: 500;
+  line-height: 20px;
   cursor: pointer;
   user-select: none;
   -webkit-user-select: none;
   white-space: nowrap;
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-  background-color: #24292e;
-  color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  background-color: var(--btn-bg);
+  color: var(--text-main);
+  border: 1px solid var(--color-border-default);
+  box-shadow: var(--shadow-sm);
 }
 
-[data-theme="dark"] .github-btn {
-  background-color: #30363d;
-  border-color: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+.github-btn svg {
+  flex-shrink: 0;
+  display: inline-flex;
 }
 
 .github-btn:hover {
-  background-color: #1a1f24;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.42);
-  transform: translateY(-1px);
+  background-color: var(--btn-hover);
+  border-color: #8b949e;
 }
 
 .github-btn:active {
-  transform: scale(0.97);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  background-color: var(--btn-active);
+  transform: translateY(1px);
 }
 
-/* Connected state — green tint */
+/* Connected state — GitHub green accent */
 .github-btn.github-btn-connected {
-  background: linear-gradient(135deg, #1a7f37 0%, #2da44e 100%);
-  border-color: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 2px 8px rgba(45, 164, 78, 0.35);
+  background-color: rgba(35, 134, 54, 0.15);
+  color: #3fb950;
+  border-color: rgba(63, 185, 80, 0.4);
 }
 
 .github-btn.github-btn-connected:hover {
-  box-shadow: 0 4px 14px rgba(45, 164, 78, 0.5);
+  background-color: rgba(35, 134, 54, 0.28);
+  border-color: #3fb950;
 }
 
 /* ── GitHub Modal Window ───────────────────────────────────────────────────── */
