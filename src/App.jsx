@@ -200,6 +200,27 @@ function App() {
     return () => window.removeEventListener('keydown', handleEscape);
   }, [activeModal]);
 
+  // Handle keyboard shortcuts for switching view modes (Ctrl/Cmd + Alt + 1/2/3)
+  useEffect(() => {
+    const handleViewModeShortcuts = (e) => {
+      const modifier = e.ctrlKey || e.metaKey;
+      if (modifier && e.altKey) {
+        if (e.key === '1') {
+          e.preventDefault();
+          setViewMode('editor');
+        } else if (e.key === '2') {
+          e.preventDefault();
+          setViewMode('split');
+        } else if (e.key === '3') {
+          e.preventDefault();
+          setViewMode('preview');
+        }
+      }
+    };
+    window.addEventListener('keydown', handleViewModeShortcuts);
+    return () => window.removeEventListener('keydown', handleViewModeShortcuts);
+  }, []);
+
   // Auto-save draft to localStorage whenever markdown changes (debounced)
   useEffect(() => {
     const timer = setTimeout(() => {
