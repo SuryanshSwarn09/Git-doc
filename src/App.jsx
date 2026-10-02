@@ -140,6 +140,8 @@ function App() {
   // State to track which modal is currently open ('privacy', 'terms', 'clear', 'print', or null)
   const [activeModal, setActiveModal] = useState(null);
   const [lastClearedContent, setLastClearedContent] = useState(null);
+  const [isExportMenuOpen, setIsExportMenuOpen] = useState(false);
+  const exportMenuRef = useRef(null);
   
   // Interactive print layout options state (columns, paper size, margins, heading numbering)
   const [printOptions, setPrintOptions] = useState(getStoredPrintOptions);
@@ -190,16 +192,35 @@ function App() {
     return unsubscribe;
   }, []);
 
-  // Handle Escape key to dismiss modals
+  // Handle Escape key to dismiss modals and menus
   useEffect(() => {
     const handleEscape = (e) => {
-      if (e.key === 'Escape' && activeModal) {
-        setActiveModal(null);
+      if (e.key === 'Escape') {
+        if (isExportMenuOpen) {
+          setIsExportMenuOpen(false);
+        } else if (activeModal) {
+          setActiveModal(null);
+        }
       }
     };
     window.addEventListener('keydown', handleEscape);
     return () => window.removeEventListener('keydown', handleEscape);
-  }, [activeModal]);
+  }, [activeModal, isExportMenuOpen]);
+
+  // Handle click outside to close the export menu
+  useEffect(() => {
+    const handleClickOutsideExport = (event) => {
+      if (exportMenuRef.current && !exportMenuRef.current.contains(event.target)) {
+        setIsExportMenuOpen(false);
+      }
+    };
+    if (isExportMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutsideExport);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutsideExport);
+    };
+  }, [isExportMenuOpen]);
 
   // Handle keyboard shortcuts for switching view modes (Ctrl/Cmd + Alt + 1/2/3)
   useEffect(() => {
