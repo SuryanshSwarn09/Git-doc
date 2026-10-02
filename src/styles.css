@@ -560,6 +560,70 @@ body {
   padding: 32px 48px;
 }
 
+/* --- ZEN / DISTRACTION-FREE MODE --- */
+.app-container.zen-mode-active {
+  padding: 16px 28px;
+  gap: 0;
+  max-width: 100vw;
+}
+
+.app-container.zen-mode-active .top-bar,
+.app-container.zen-mode-active .app-status-bar {
+  display: none !important;
+}
+
+.app-container.zen-mode-active ~ .github-profile-wrapper {
+  display: none !important;
+}
+
+.app-container.zen-mode-active .split-layout {
+  height: 100%;
+  gap: 16px;
+}
+
+.app-container.zen-mode-active .pane {
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+  border-radius: 14px;
+}
+
+.app-container.zen-mode-active .pane-header {
+  opacity: 0.35;
+  transition: opacity 0.25s ease;
+  padding: 8px 24px;
+}
+
+.app-container.zen-mode-active .pane:hover .pane-header {
+  opacity: 0.9;
+}
+
+.app-container.zen-mode-active .split-layout.layout-mode-editor .editor-input {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 40px 48px;
+  font-size: 1.1rem;
+  line-height: 1.8;
+}
+
+.app-container.zen-mode-active .split-layout.layout-mode-preview .preview-output {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 52px;
+  font-size: 1.08rem;
+  line-height: 1.8;
+}
+
+.zen-btn.active {
+  background: rgba(0, 113, 227, 0.12);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+[data-theme="dark"] .zen-btn.active {
+  background: rgba(10, 132, 255, 0.18);
+  color: #409cff;
+  border-color: #409cff;
+}
+
 .pane {
   flex: 1;
   display: flex;
