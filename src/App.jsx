@@ -36,7 +36,9 @@ import {
   SplitViewIcon,
   PreviewViewIcon,
   ChevronDownIcon,
-  InfoIcon
+  InfoIcon,
+  ZenModeIcon,
+  ZenExitIcon
 } from './components/Icons.jsx';
 import PrintModal from './components/PrintModal.jsx';
 import GitHubModal from './components/GitHubModal.jsx';
@@ -148,6 +150,19 @@ function App() {
   const [printOptions, setPrintOptions] = useState(getStoredPrintOptions);
   // GitHub connected user state
   const [githubUser, setGithubUser] = useState(null);
+  // Distraction-free Zen Mode state
+  const [isZenMode, setIsZenMode] = useState(false);
+
+  // Exit Zen mode on Escape key press
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && isZenMode) {
+        setIsZenMode(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isZenMode]);
 
   useEffect(() => {
     saveStoredPrintOptions(printOptions);
