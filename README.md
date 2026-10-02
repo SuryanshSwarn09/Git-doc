@@ -1,4 +1,4 @@
-# MARKDOWN LATEX PDF GENERATOR — GitHub Edition
+# <img src="./public/apple-touch-icon.png" alt="Git-doc logo" width="32" height="32" valign="middle" /> MARKDOWN LATEX PDF GENERATOR — GitHub Edition
 *A Markdown + LaTeX editor with live preview, PDF export, and full GitHub API integration.*
 
 > This project started in March 2026 as a practical Markdown + LaTeX editor. In October 2026 it was extended with a full **GitHub API integration** as part of the GitHub Developer Program — enabling users to import files from repos, save drafts as Gists, and commit Markdown directly to GitHub, all from inside the editor.
