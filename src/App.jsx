@@ -30,15 +30,18 @@ import {
   MathIcon,
   CheckCircleIcon, 
   SyncScrollIcon,
-  TocIcon
+  TocIcon,
+  GitHubIcon
 } from './components/Icons.jsx';
 import PrintModal from './components/PrintModal.jsx';
+import GitHubModal from './components/GitHubModal.jsx';
 import { 
   getStoredPrintOptions, 
   saveStoredPrintOptions, 
   generatePrintCSS, 
   PRINT_PRESETS 
 } from './utils/printOptions.js';
+import { getGitHubToken, verifyGitHubToken } from './utils/githubApi.js';
 import { 
   slugifyHeading, 
   generateTOCMarkdown, 
@@ -113,10 +116,22 @@ function App() {
   
   // Interactive print layout options state (columns, paper size, margins, heading numbering)
   const [printOptions, setPrintOptions] = useState(getStoredPrintOptions);
+  // GitHub connected user state
+  const [githubUser, setGithubUser] = useState(null);
 
   useEffect(() => {
     saveStoredPrintOptions(printOptions);
   }, [printOptions]);
+
+  // Restore GitHub session on mount if a valid token is stored
+  useEffect(() => {
+    const token = getGitHubToken();
+    if (token) {
+      verifyGitHubToken(token)
+        .then((user) => setGithubUser(user))
+        .catch(() => { /* token expired or revoked — silently skip */ });
+    }
+  }, []);
   
   const editorRef = useRef(null);
   const previewRef = useRef(null);
@@ -594,6 +609,16 @@ function App() {
             <span className="btn-label-full">Print PDF</span>
             <span className="btn-label-short">Print</span>
           </button>
+          <button
+            className={`github-btn ${githubUser ? 'github-btn-connected' : ''}`}
+            onClick={() => setActiveModal('github')}
+            title={githubUser ? `GitHub — connected as @${githubUser.login}` : 'GitHub Integration — Import, Gist, Commit'}
+            aria-label="GitHub Integration"
+          >
+            <GitHubIcon size={15} />
+            <span className="btn-label-full">{githubUser ? `@${githubUser.login}` : 'GitHub'}</span>
+            <span className="btn-label-short">GH</span>
+          </button>
           <button 
             className="clear-btn" 
             onClick={handleClear} 
@@ -782,6 +807,19 @@ function App() {
         options={printOptions}
         onOptionsChange={setPrintOptions}
         onSelectPreset={handleSelectPrintPreset}
+      />
+
+      {/* GitHub Integration Modal */}
+      <GitHubModal
+        isOpen={activeModal === 'github'}
+        onClose={() => setActiveModal(null)}
+        markdown={markdown}
+        onImport={(content) => {
+          setMarkdown(content);
+          setActiveModal(null);
+        }}
+        githubUser={githubUser}
+        onUserChange={setGithubUser}
       />
       
     </div>
