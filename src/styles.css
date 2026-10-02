@@ -1882,3 +1882,629 @@ body {
     content: counter(page);
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   GITHUB INTEGRATION STYLES
+   All classes prefixed with .gh- or .github-btn to avoid conflicts.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── GitHub Toolbar Button ─────────────────────────────────────────────────── */
+
+.github-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  height: 36px;
+  padding: 0 13px;
+  border-radius: 9px;
+  font-family: inherit;
+  font-size: 0.84rem;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  white-space: nowrap;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  background-color: #24292e;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
+}
+
+[data-theme="dark"] .github-btn {
+  background-color: #30363d;
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.github-btn:hover {
+  background-color: #1a1f24;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.42);
+  transform: translateY(-1px);
+}
+
+.github-btn:active {
+  transform: scale(0.97);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
+/* Connected state — green tint */
+.github-btn.github-btn-connected {
+  background: linear-gradient(135deg, #1a7f37 0%, #2da44e 100%);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 2px 8px rgba(45, 164, 78, 0.35);
+}
+
+.github-btn.github-btn-connected:hover {
+  box-shadow: 0 4px 14px rgba(45, 164, 78, 0.5);
+}
+
+/* ── GitHub Modal Window ───────────────────────────────────────────────────── */
+
+.gh-modal-window {
+  max-width: 600px;
+  padding: 28px;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.gh-modal-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.gh-modal-icon-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #24292e;
+  color: #ffffff;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .gh-modal-icon-badge {
+  background: #30363d;
+}
+
+.gh-modal-title-group {
+  flex: 1;
+}
+
+.gh-modal-title-group h2 {
+  margin: 0 0 4px 0;
+  padding: 0;
+  border: none;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: -0.01em;
+}
+
+.gh-modal-subtitle {
+  margin: 0;
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.gh-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid rgba(45, 164, 78, 0.5);
+  flex-shrink: 0;
+}
+
+/* ── Tab Navigation ────────────────────────────────────────────────────────── */
+
+.gh-tabs {
+  display: flex;
+  gap: 2px;
+  border-bottom: 1px solid var(--glass-border);
+  margin-bottom: 20px;
+}
+
+.gh-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 0.83rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  border-radius: 8px 8px 0 0;
+  transition: all 0.16s ease;
+  white-space: nowrap;
+}
+
+.gh-tab:hover {
+  color: var(--text-main);
+  background: var(--btn-bg);
+}
+
+.gh-tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  background: rgba(0, 113, 227, 0.06);
+}
+
+[data-theme="dark"] .gh-tab.active {
+  color: #409cff;
+  border-bottom-color: #409cff;
+  background: rgba(10, 132, 255, 0.1);
+}
+
+.gh-tab-emoji {
+  font-size: 0.9rem;
+}
+
+/* ── Tab Panel ─────────────────────────────────────────────────────────────── */
+
+.gh-tab-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 200px;
+}
+
+.gh-panel-desc {
+  font-size: 0.87rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ── Form Fields ───────────────────────────────────────────────────────────── */
+
+.gh-label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 5px;
+}
+
+.gh-optional {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  opacity: 0.7;
+}
+
+.gh-input {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--glass-border);
+  background: var(--btn-bg);
+  color: var(--text-main);
+  font-family: inherit;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.gh-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.15);
+}
+
+[data-theme="dark"] .gh-input:focus {
+  box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.18);
+}
+
+.gh-input::placeholder {
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
+.gh-input-row {
+  display: flex;
+  gap: 10px;
+}
+
+.gh-field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.gh-input-action-row {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.gh-input-action-row .gh-input {
+  flex: 1;
+}
+
+/* ── Buttons ───────────────────────────────────────────────────────────────── */
+
+.gh-primary-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 18px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, #24292e 0%, #3d444d 100%);
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  margin-top: 4px;
+}
+
+.gh-primary-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1a1f24 0%, #2d333b 100%);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.38);
+  transform: translateY(-1px);
+}
+
+.gh-primary-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.gh-primary-btn:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+.gh-secondary-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 11px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--glass-border);
+  background: var(--btn-bg);
+  color: var(--text-main);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  margin-top: 4px;
+}
+
+.gh-secondary-btn:hover {
+  background: var(--btn-hover);
+  transform: translateY(-1px);
+}
+
+.gh-fetch-btn {
+  flex-shrink: 0;
+  padding: 10px 16px;
+  margin-top: 0;
+  align-self: center;
+}
+
+/* ── Info / Warning / Error / Success Cards ────────────────────────────────── */
+
+.gh-info-box {
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: rgba(0, 113, 227, 0.07);
+  border: 1px solid rgba(0, 113, 227, 0.2);
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: var(--text-main);
+}
+
+[data-theme="dark"] .gh-info-box {
+  background: rgba(10, 132, 255, 0.1);
+  border-color: rgba(10, 132, 255, 0.25);
+}
+
+.gh-info-box strong {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text-main);
+}
+
+.gh-info-list {
+  padding-left: 18px;
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.gh-info-list a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.gh-info-list a:hover {
+  text-decoration: underline;
+}
+
+.gh-info-list code {
+  background: rgba(0, 0, 0, 0.07);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+[data-theme="dark"] .gh-info-list code {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.gh-warning-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: rgba(255, 159, 10, 0.1);
+  border: 1px solid rgba(255, 159, 10, 0.28);
+  font-size: 0.86rem;
+  font-weight: 500;
+  color: var(--text-main);
+}
+
+.gh-inline-link {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 0.86rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  margin-left: auto;
+  text-decoration: none;
+  font-family: inherit;
+}
+
+.gh-inline-link:hover {
+  text-decoration: underline;
+}
+
+.gh-error-msg {
+  font-size: 0.84rem;
+  color: #ff3b30;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(255, 59, 48, 0.08);
+  border: 1px solid rgba(255, 59, 48, 0.22);
+  margin: 0;
+}
+
+.gh-success-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: rgba(52, 199, 89, 0.1);
+  border: 1px solid rgba(52, 199, 89, 0.3);
+  color: #34c759;
+  font-size: 0.88rem;
+}
+
+.gh-success-card strong {
+  display: block;
+  color: var(--text-main);
+  margin-bottom: 4px;
+}
+
+.gh-result-link {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.84rem;
+}
+
+.gh-result-link:hover {
+  text-decoration: underline;
+}
+
+/* ── Connected User Card (Tab 1) ───────────────────────────────────────────── */
+
+.gh-connected-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: rgba(52, 199, 89, 0.08);
+  border: 1px solid rgba(52, 199, 89, 0.28);
+}
+
+.gh-connected-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid rgba(52, 199, 89, 0.4);
+  flex-shrink: 0;
+}
+
+.gh-connected-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.gh-connected-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--text-main);
+}
+
+.gh-connected-login {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.gh-connected-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: rgba(52, 199, 89, 0.14);
+  border: 1px solid rgba(52, 199, 89, 0.35);
+  color: #34c759;
+  font-size: 0.78rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.gh-disconnect-btn {
+  background: none;
+  border: 1px solid rgba(255, 59, 48, 0.35);
+  color: #ff3b30;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.16s ease;
+  flex-shrink: 0;
+}
+
+.gh-disconnect-btn:hover {
+  background: rgba(255, 59, 48, 0.1);
+}
+
+/* ── Import Preview Card (Tab 2) ───────────────────────────────────────────── */
+
+.gh-preview-card {
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--glass-border);
+  background: var(--btn-bg);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.gh-preview-card-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.gh-preview-filename {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--text-main);
+}
+
+.gh-preview-meta {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.gh-preview-snippet {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-family: ui-monospace, Menlo, Monaco, Consolas, monospace;
+  line-height: 1.4;
+  background: rgba(0,0,0,0.04);
+  padding: 8px 10px;
+  border-radius: 8px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  margin: 0;
+}
+
+[data-theme="dark"] .gh-preview-snippet {
+  background: rgba(255,255,255,0.05);
+}
+
+.gh-preview-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+/* ── Visibility Toggle (Gist Tab) ──────────────────────────────────────────── */
+
+.gh-visibility-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.gh-segmented {
+  display: flex;
+  gap: 4px;
+  background: var(--btn-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  padding: 3px;
+}
+
+.gh-seg-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px;
+  border: none;
+  border-radius: 7px;
+  background: none;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 0.83rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.16s ease;
+}
+
+.gh-seg-btn.active {
+  background: var(--accent);
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 113, 227, 0.3);
+}
+
+[data-theme="dark"] .gh-seg-btn.active {
+  background: #0a84ff;
+  box-shadow: 0 2px 6px rgba(10, 132, 255, 0.35);
+}
+
+/* ── Loading Spinner ───────────────────────────────────────────────────────── */
+
+.gh-spinner {
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: gh-spin 0.65s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes gh-spin {
+  to { transform: rotate(360deg); }
+}
