@@ -1553,6 +1553,13 @@ body {
 /* --- RESPONSIVE LAYOUT ENGINE --- */
 
 /* Tier 2: Compact Desktop & Landscape Tablet (880px - 1200px) */
+@media (max-width: 1320px) {
+  .top-bar {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+}
+
 @media (max-width: 1200px) and (min-width: 880px) {
   .app-container {
     padding: 18px 24px;
@@ -1562,6 +1569,7 @@ body {
   .top-bar {
     padding: 8px 14px;
     gap: 10px;
+    flex-wrap: wrap;
   }
 
   .action-buttons {
