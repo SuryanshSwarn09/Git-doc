@@ -2435,19 +2435,55 @@ body {
 /* ── GitHub Modal Window ───────────────────────────────────────────────────── */
 
 .gh-modal-window {
+  position: relative;
   max-width: 600px;
-  padding: 28px;
+  width: 100%;
+  padding: 24px 28px;
   border-radius: 20px;
   display: flex;
   flex-direction: column;
   gap: 0;
+  max-height: 88vh;
+  overflow-y: auto;
 }
 
 .gh-modal-header {
+  position: relative;
   display: flex;
   align-items: flex-start;
   gap: 16px;
   margin-bottom: 20px;
+  padding-right: 40px;
+}
+
+.gh-modal-close-btn {
+  position: absolute;
+  top: -2px;
+  right: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  border: 1px solid var(--glass-border);
+  background: var(--btn-bg);
+  color: var(--text-muted);
+  font-size: 1.35rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.16s ease;
+}
+
+.gh-modal-close-btn:hover {
+  color: var(--text-main);
+  background: var(--btn-hover);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: scale(1.06);
+}
+
+.gh-modal-close-btn:active {
+  transform: scale(0.96);
 }
 
 .gh-modal-icon-badge {
@@ -2552,6 +2588,7 @@ body {
   flex-direction: column;
   gap: 12px;
   min-height: 200px;
+  flex-shrink: 0;
 }
 
 .gh-panel-desc {
@@ -2591,6 +2628,8 @@ body {
   font-size: 0.9rem;
   outline: none;
   transition: border-color 0.18s ease, box-shadow 0.18s ease;
+  flex-shrink: 0;
+  min-height: 42px;
 }
 
 .gh-input:focus {
@@ -2934,8 +2973,15 @@ body {
 
 .gh-preview-actions {
   display: flex;
-  gap: 8px;
-  margin-top: 4px;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+  flex-shrink: 0;
+}
+
+.gh-preview-actions .gh-primary-btn,
+.gh-preview-actions .gh-secondary-btn {
+  margin-top: 0;
 }
 
 /* ── Visibility Toggle (Gist Tab) ──────────────────────────────────────────── */
