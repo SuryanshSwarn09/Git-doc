@@ -792,6 +792,18 @@ function App() {
             <span className="btn-label-full">{githubUser ? `@${githubUser.login}` : 'GitHub'}</span>
             <span className="btn-label-short">GH</span>
           </button>
+          <a
+            href="https://github.com/SuryanshSwarn09/Git-doc"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="action-btn github-repo-btn"
+            title="View Git-doc repository on GitHub (SuryanshSwarn09/Git-doc)"
+            aria-label="View Git-doc repository on GitHub"
+          >
+            <GitHubIcon size={15} />
+            <span className="btn-label-full">Repo</span>
+            <span className="btn-label-short">Repo</span>
+          </a>
           <button
             type="button"
             className={`action-btn zen-btn ${isZenMode ? 'active' : ''}`}
@@ -937,26 +949,6 @@ function App() {
         </div>
       </footer>
 
-      {/* GitHub Profile Button */}
-      <div className="github-profile-wrapper">
-        <a
-          href="https://github.com/SuryanshSwarn09"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="github-profile-btn"
-        >
-          {/* My pfp Icon */}
-          <img
-            src="pfp.png" 
-            alt="GitHub Profile"
-          />
-
-          {/* Tooltip / Label */}
-          <div className="github-profile-tooltip">
-            <p>CODED BY SURYANSH</p>
-          </div>
-        </a>
-      </div>
 
       {/* The Modal Overlay System */}
       {activeModal && activeModal !== 'print' && (
