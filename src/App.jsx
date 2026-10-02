@@ -593,6 +593,22 @@ function App() {
       )}
       
       <div className="top-bar">
+        <div className="repo-header-brand">
+          <a
+            href="https://github.com/SuryanshSwarn09/Git-doc"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="repo-breadcrumb"
+            title="Open SuryanshSwarn09/Git-doc on GitHub"
+          >
+            <GitHubIcon size={18} className="repo-octocat-icon" />
+            <span className="repo-owner">SuryanshSwarn09</span>
+            <span className="repo-slash">/</span>
+            <span className="repo-name">Git-doc</span>
+          </a>
+          <span className="repo-badge-public">Public</span>
+        </div>
+
         <div className="view-mode-selector" role="radiogroup" aria-label="View Mode">
           <button
             type="button"
