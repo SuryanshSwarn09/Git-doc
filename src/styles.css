@@ -624,6 +624,63 @@ body {
   border-color: #409cff;
 }
 
+/* --- FLOATING ZEN EXIT PILL --- */
+.zen-exit-pill {
+  position: fixed;
+  top: 18px;
+  right: 28px;
+  z-index: 1200;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.22);
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  opacity: 0.55;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: zenPillFadeIn 0.3s ease;
+}
+
+.zen-exit-pill:hover {
+  opacity: 1;
+  color: var(--text-main);
+  background: var(--btn-hover);
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.3);
+  transform: translateY(-1px);
+}
+
+.zen-exit-pill:active {
+  transform: scale(0.97);
+}
+
+.zen-exit-pill svg {
+  flex-shrink: 0;
+  color: var(--accent);
+}
+
+@keyframes zenPillFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 0.55;
+    transform: translateY(0);
+  }
+}
+
 .pane {
   flex: 1;
   display: flex;
