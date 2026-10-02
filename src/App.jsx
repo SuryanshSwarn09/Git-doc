@@ -690,6 +690,59 @@ function App() {
               <span className="btn-label-short">Export</span>
               <ChevronDownIcon size={13} className={`export-chevron ${isExportMenuOpen ? 'open' : ''}`} />
             </button>
+
+            {isExportMenuOpen && (
+              <div className="export-menu" role="menu" aria-label="Export formats">
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="export-menu-item"
+                  onClick={() => {
+                    handleDownloadMarkdown();
+                    setIsExportMenuOpen(false);
+                  }}
+                  disabled={!markdown.trim()}
+                >
+                  <DownloadIcon size={15} />
+                  <div className="export-item-text">
+                    <span className="export-item-title">Export Markdown (.md)</span>
+                    <span className="export-item-desc">Raw Markdown source file</span>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="export-menu-item"
+                  onClick={() => {
+                    handleDownloadHTML();
+                    setIsExportMenuOpen(false);
+                  }}
+                  disabled={!markdown.trim()}
+                >
+                  <FileCodeIcon size={15} />
+                  <div className="export-item-text">
+                    <span className="export-item-title">Export HTML (.html)</span>
+                    <span className="export-item-desc">Self-contained file with styling</span>
+                  </div>
+                </button>
+                <div className="export-menu-divider" />
+                <button
+                  type="button"
+                  role="menuitem"
+                  className={`export-menu-item ${copiedHTML ? 'copy-success' : ''}`}
+                  onClick={() => {
+                    handleCopyHTML();
+                  }}
+                  disabled={!markdown.trim()}
+                >
+                  {copiedHTML ? <CheckIcon size={15} /> : <CopyIcon size={15} />}
+                  <div className="export-item-text">
+                    <span className="export-item-title">{copiedHTML ? 'Copied to Clipboard!' : 'Copy Rich HTML'}</span>
+                    <span className="export-item-desc">Paste directly into Docs or CMS</span>
+                  </div>
+                </button>
+              </div>
+            )}
           </div>
           <button 
             className="print-btn" 
