@@ -856,11 +856,69 @@ function App() {
         </div>
       </div>
 
-      {/* Footer Links for the Legal Pages */}
-      <div className="footer-links">
-        <button onClick={() => setActiveModal('privacy')}>Privacy Policy</button>
-        <button onClick={() => setActiveModal('terms')}>Terms & Conditions</button>
-      </div>
+      {/* App Bottom Status Bar */}
+      <footer className="app-status-bar" role="contentinfo" aria-label="Editor Status Bar">
+        <div className="status-bar-left">
+          <span className="status-item status-save-pill" title="Saved locally in browser storage">
+            <CheckCircleIcon size={12} />
+            <span>{saveStatus === 'Saved' ? 'Saved locally' : 'Saving draft…'}</span>
+          </span>
+          <span className="status-divider" />
+          <span className="status-item status-doc-name" title="Document Title">
+            📄 {extractDocTitle(markdown)}
+          </span>
+          {githubUser && (
+            <>
+              <span className="status-divider" />
+              <button
+                type="button"
+                className="status-item status-btn status-gh-link"
+                onClick={() => setActiveModal('github')}
+                title={`Connected to GitHub as @${githubUser.login}`}
+              >
+                <GitHubIcon size={12} />
+                <span>@{githubUser.login}</span>
+              </button>
+            </>
+          )}
+        </div>
+
+        <div className="status-bar-right">
+          <span className="status-item" title="Word count">{stats.words} words</span>
+          <span className="status-item" title="Character count">{stats.characters} chars</span>
+          <span className="status-item status-time" title="Estimated reading time">{stats.readingTime}</span>
+          <span className="status-divider" />
+          <button
+            type="button"
+            className={`status-item status-btn sync-scroll-toggle ${syncScroll ? 'active' : ''}`}
+            onClick={() => setSyncScroll(prev => !prev)}
+            title={`Synchronized Scrolling: ${syncScroll ? 'ON' : 'OFF'} (Click to toggle)`}
+            aria-pressed={syncScroll}
+          >
+            <SyncScrollIcon size={12} />
+            <span>Sync: {syncScroll ? 'ON' : 'OFF'}</span>
+          </button>
+          <span className="status-divider" />
+          <div className="status-legal-links">
+            <button
+              type="button"
+              className="status-item status-btn"
+              onClick={() => setActiveModal('privacy')}
+              title="Privacy Policy"
+            >
+              Privacy
+            </button>
+            <button
+              type="button"
+              className="status-item status-btn"
+              onClick={() => setActiveModal('terms')}
+              title="Terms and Conditions"
+            >
+              Terms
+            </button>
+          </div>
+        </div>
+      </footer>
 
       {/* GitHub Profile Button */}
       <div className="github-profile-wrapper">
