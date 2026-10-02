@@ -543,6 +543,45 @@ function App() {
     <div className="app-container">
       
       <div className="top-bar">
+        <div className="view-mode-selector" role="radiogroup" aria-label="View Mode">
+          <button
+            type="button"
+            role="radio"
+            aria-checked={viewMode === 'editor'}
+            className={`view-mode-btn ${viewMode === 'editor' ? 'active' : ''}`}
+            onClick={() => setViewMode('editor')}
+            title="Write Mode (Ctrl+Alt+1) — Editor only"
+            aria-label="Write Mode (Editor only)"
+          >
+            <EditViewIcon size={14} />
+            <span className="view-mode-label">Write</span>
+          </button>
+          <button
+            type="button"
+            role="radio"
+            aria-checked={viewMode === 'split'}
+            className={`view-mode-btn ${viewMode === 'split' ? 'active' : ''}`}
+            onClick={() => setViewMode('split')}
+            title="Split Mode (Ctrl+Alt+2) — Side by side"
+            aria-label="Split Mode (Side by side)"
+          >
+            <SplitViewIcon size={14} />
+            <span className="view-mode-label">Split</span>
+          </button>
+          <button
+            type="button"
+            role="radio"
+            aria-checked={viewMode === 'preview'}
+            className={`view-mode-btn ${viewMode === 'preview' ? 'active' : ''}`}
+            onClick={() => setViewMode('preview')}
+            title="Preview Mode (Ctrl+Alt+3) — Read only"
+            aria-label="Preview Mode (Read only)"
+          >
+            <PreviewViewIcon size={14} />
+            <span className="view-mode-label">Read</span>
+          </button>
+        </div>
+
         <div className="toolbar" role="toolbar" aria-label="Markdown formatting toolbar">
           <div className="toolbar-group" aria-label="Headings">
             <button className="format-btn format-btn-text" onClick={() => handleFormat('# ', '')} title="Heading 1" aria-label="Heading 1">H1</button>
