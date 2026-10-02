@@ -581,3 +581,24 @@ export function EditViewIcon({ size = 15, className = '', ...props }) {
     </svg>
   );
 }
+
+export function SplitViewIcon({ size = 15, className = '', ...props }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+      {...props}
+    >
+      <rect x="3" y="3" width="18" height="18" rx="2" />
+      <path d="M12 3v18" />
+    </svg>
+  );
+}
