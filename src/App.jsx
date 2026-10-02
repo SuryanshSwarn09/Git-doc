@@ -674,39 +674,23 @@ function App() {
               <span className="btn-label-short">Undo</span>
             </button>
           )}
-          <button 
-            className="action-btn" 
-            onClick={handleDownloadMarkdown} 
-            title="Download active document as Markdown (.md)"
-            aria-label="Download Markdown (.md)"
-            disabled={!markdown.trim()}
-          >
-            <DownloadIcon size={15} />
-            <span className="btn-label-full">Export .md</span>
-            <span className="btn-label-short">.md</span>
-          </button>
-          <button 
-            className="action-btn" 
-            onClick={handleDownloadHTML} 
-            title="Export standalone self-contained HTML (.html) with KaTeX math"
-            aria-label="Export standalone HTML (.html)"
-            disabled={!markdown.trim()}
-          >
-            <FileCodeIcon size={15} />
-            <span className="btn-label-full">Export .html</span>
-            <span className="btn-label-short">.html</span>
-          </button>
-          <button 
-            className={`action-btn ${copiedHTML ? 'copy-success' : ''}`}
-            onClick={handleCopyHTML} 
-            title="Copy rich HTML to clipboard (paste into Medium, Dev.to, Google Docs, or email)"
-            aria-label={copiedHTML ? "Copied HTML to clipboard" : "Copy rich HTML"}
-            disabled={!markdown.trim()}
-          >
-            {copiedHTML ? <CheckIcon size={15} /> : <CopyIcon size={15} />}
-            <span className="btn-label-full">{copiedHTML ? 'Copied!' : 'Copy HTML'}</span>
-            <span className="btn-label-short">{copiedHTML ? 'Copied' : 'Copy'}</span>
-          </button>
+          <div className="export-dropdown" ref={exportMenuRef}>
+            <button 
+              type="button"
+              className={`action-btn export-trigger-btn ${isExportMenuOpen ? 'active' : ''}`} 
+              onClick={() => setIsExportMenuOpen(prev => !prev)} 
+              title="Export document (Markdown, HTML, or copy)"
+              aria-label="Export menu"
+              aria-expanded={isExportMenuOpen}
+              aria-haspopup="true"
+              disabled={!markdown.trim()}
+            >
+              <DownloadIcon size={15} />
+              <span className="btn-label-full">Export</span>
+              <span className="btn-label-short">Export</span>
+              <ChevronDownIcon size={13} className={`export-chevron ${isExportMenuOpen ? 'open' : ''}`} />
+            </button>
+          </div>
           <button 
             className="print-btn" 
             onClick={handlePrint} 
