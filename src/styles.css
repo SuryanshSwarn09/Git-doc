@@ -403,6 +403,72 @@ body {
   }
 }
 
+.export-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  border-radius: 9px;
+  color: var(--text-main);
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.export-menu-item svg {
+  flex-shrink: 0;
+  color: var(--accent);
+}
+
+.export-item-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.export-item-title {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.export-item-desc {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.export-menu-item:hover:not(:disabled) {
+  background: var(--btn-hover);
+  transform: translateX(2px);
+}
+
+.export-menu-item:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.export-menu-item:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.export-menu-divider {
+  height: 1px;
+  background: var(--glass-border);
+  margin: 4px 6px;
+}
+
+.export-menu-item.copy-success svg {
+  color: #34c759;
+}
+
+.export-menu-item.copy-success .export-item-title {
+  color: #34c759;
+}
+
 /* Destructive Action: Clear (Subtle Frosted Red on Hover) */
 .clear-btn {
   background-color: var(--btn-bg);
