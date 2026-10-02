@@ -592,8 +592,9 @@ function App() {
         </button>
       )}
       
-      <div className="top-bar">
-        <div className="repo-header-brand">
+      <header className="top-bar" role="banner">
+        <div className="top-bar-left">
+          <div className="repo-header-brand">
           <a
             href="https://github.com/SuryanshSwarn09/Git-doc"
             target="_blank"
@@ -647,7 +648,9 @@ function App() {
             <span className="view-mode-label">Read</span>
           </button>
         </div>
+      </div>
 
+      <div className="top-bar-center">
         <div className="toolbar" role="toolbar" aria-label="Markdown formatting toolbar">
           <div className="toolbar-group" aria-label="Headings">
             <button className="format-btn format-btn-text" onClick={() => handleFormat('# ', '')} title="Heading 1" aria-label="Heading 1">H1</button>
@@ -704,7 +707,9 @@ function App() {
             </button>
           </div>
         </div>
-        
+      </div>
+      
+      <div className="top-bar-right">
         <div className="action-buttons">
           {lastClearedContent && markdown === '' && (
             <button 
@@ -833,6 +838,7 @@ function App() {
           </button>
         </div>
       </div>
+    </header>
 
       <div className={`split-layout layout-mode-${viewMode}`}>
         <div className={`pane editor-pane ${viewMode === 'preview' ? 'layout-pane-hidden' : ''} ${viewMode === 'editor' ? 'layout-pane-focused' : ''}`}>

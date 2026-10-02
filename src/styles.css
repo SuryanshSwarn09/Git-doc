@@ -180,6 +180,28 @@ body {
   gap: 14px;
 }
 
+.top-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+.top-bar-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.top-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
 /* ── GitHub Repository Header Breadcrumb ───────────────────────────────────── */
 .repo-header-brand {
   display: inline-flex;
