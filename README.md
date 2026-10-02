@@ -1,4 +1,4 @@
-﻿# MARKDOWN LATEX PDF GENERATOR — GitHub Edition
+# MARKDOWN LATEX PDF GENERATOR — GitHub Edition
 *A Markdown + LaTeX editor with live preview, PDF export, and full GitHub API integration.*
 
 > This project started in March 2026 as a practical Markdown + LaTeX editor. In October 2026 it was extended with a full **GitHub API integration** as part of the GitHub Developer Program — enabling users to import files from repos, save drafts as Gists, and commit Markdown directly to GitHub, all from inside the editor.
@@ -62,5 +62,11 @@ This version adds a dedicated **GitHub panel** accessible via the `GitHub` butto
 5. Open the app → click **GitHub** → paste in the **Connect** tab
 
 > **Security note:** The token is stored only in your browser's `localStorage` and is only ever sent to `api.github.com` over HTTPS. The app has no backend and does not transmit your token anywhere else.
+
+---
+
+## License
+
+This project is licensed under the [MIT License](LICENSE) — see the [LICENSE](LICENSE) file for details.
 
 # ORIGINAL PROJECT: MARKDOWN LATEX PDF GENERATOR  Go to [github.com/SuryanshSwarn09/markdown-pdf](https://github.com/SuryanshSwarn09/markdown-pdf)
