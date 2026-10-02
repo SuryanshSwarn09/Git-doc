@@ -3083,4 +3083,116 @@ body {
 
 @keyframes gh-spin {
   to { transform: rotate(360deg); }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE LAYOUT & MEDIA QUERIES
+   Adapts for laptops, tablets, and mobile devices
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Laptops & Desktops (< 1280px) */
+@media screen and (max-width: 1280px) {
+  .btn-label-full {
+    display: none;
+  }
+  .btn-label-short {
+    display: inline;
+  }
+  .top-bar {
+    gap: 8px;
+    padding: 6px 10px;
+  }
+  .top-bar-left {
+    gap: 8px;
+  }
+  .repo-owner {
+    display: none;
+  }
+  .repo-slash {
+    display: none;
+  }
+}
+
+/* Tablets Landscape & Small Laptops (< 1024px) */
+@media screen and (max-width: 1024px) {
+  .app-container {
+    padding: 8px 10px;
+    gap: 8px;
+  }
+  .top-bar-center {
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .top-bar-center::-webkit-scrollbar {
+    display: none;
+  }
+  .toolbar {
+    flex-wrap: nowrap;
+    white-space: nowrap;
+  }
+  .repo-badge-public {
+    display: none;
+  }
+  .status-item.status-time {
+    display: none;
+  }
+  .split-layout {
+    gap: 12px;
+  }
+}
+
+/* Tablets Portrait & Large Mobile (< 768px) */
+@media screen and (max-width: 768px) {
+  .top-bar {
+    flex-wrap: wrap;
+    gap: 8px;
+    height: auto;
+  }
+  .top-bar-left {
+    order: 1;
+    width: 100%;
+    justify-content: space-between;
+  }
+  .top-bar-center {
+    order: 3;
+    width: 100%;
+    justify-content: flex-start;
+    padding-top: 4px;
+    border-top: 1px solid var(--color-border-subtle);
+  }
+  .top-bar-right {
+    order: 2;
+    width: 100%;
+    justify-content: flex-end;
+  }
+  .split-layout {
+    flex-direction: column;
+  }
+  .split-layout.layout-mode-split .pane {
+    height: 50%;
+  }
+  .status-bar-left {
+    max-width: 50%;
+  }
+  .status-legal-links {
+    display: none;
+  }
+  .modal-window, .print-modal-window, .gh-modal-window {
+    width: calc(100vw - 24px) !important;
+    max-width: 100% !important;
+    margin: 12px;
+  }
+}
+
+/* Mobile Small (< 480px) */
+@media screen and (max-width: 480px) {
+  .view-mode-label {
+    display: none;
+  }
+  .action-btn, .print-btn, .clear-btn, .github-btn {
+    padding: 0 8px;
+  }
+  .status-doc-name {
+    max-width: 120px;
+  }
 }
