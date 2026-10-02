@@ -1803,6 +1803,11 @@ body {
     display: none !important; 
   }
 
+  /* Ensure preview-pane is always rendered when printing, even if in Write-only mode */
+  .preview-pane {
+    display: flex !important;
+  }
+
   /* Reset layout containers for clean document printing */
   html, body {
     background: #ffffff !important;
