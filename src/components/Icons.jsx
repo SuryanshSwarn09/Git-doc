@@ -666,4 +666,51 @@ export function InfoIcon({ size = 14, className = '', ...props }) {
   );
 }
 
+export function ZenModeIcon({ size = 16, className = '', ...props }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+      {...props}
+    >
+      <polyline points="15 3 21 3 21 9" />
+      <polyline points="9 21 3 21 3 15" />
+      <polyline points="21 15 21 21 15 21" />
+      <polyline points="3 9 3 3 9 3" />
+    </svg>
+  );
+}
+
+export function ZenExitIcon({ size = 16, className = '', ...props }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+      {...props}
+    >
+      <polyline points="4 14 10 14 10 20" />
+      <polyline points="20 10 14 10 14 4" />
+      <polyline points="14 20 14 14 20 14" />
+      <polyline points="10 4 10 10 4 10" />
+    </svg>
+  );
+}
+
+
 
