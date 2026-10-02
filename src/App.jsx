@@ -31,7 +31,10 @@ import {
   CheckCircleIcon, 
   SyncScrollIcon,
   TocIcon,
-  GitHubIcon
+  GitHubIcon,
+  EditViewIcon,
+  SplitViewIcon,
+  PreviewViewIcon
 } from './components/Icons.jsx';
 import PrintModal from './components/PrintModal.jsx';
 import GitHubModal from './components/GitHubModal.jsx';
