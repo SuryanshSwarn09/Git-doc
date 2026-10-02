@@ -83,6 +83,23 @@ markedParser.use({
       const text = this.parser.parseInline(item.tokens);
       const slug = slugifyHeading(item.text, headingSlugCounts);
       return `<h${item.depth} id="${slug}">${text}</h${item.depth}>\n`;
+    },
+    blockquote(token) {
+      const text = token.text || '';
+      const match = text.match(/^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\](?:\s*\n)?/i);
+      if (match) {
+        const alertType = match[1].toLowerCase();
+        const title = alertType.charAt(0).toUpperCase() + alertType.slice(1);
+        const cloned = JSON.parse(JSON.stringify(token.tokens));
+        if (cloned[0]?.tokens?.[0]) {
+          cloned[0].tokens[0].text = cloned[0].tokens[0].text.replace(/^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\](?:\s*\n)?/i, '');
+          if (cloned[0].tokens[0].raw) {
+            cloned[0].tokens[0].raw = cloned[0].tokens[0].raw.replace(/^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\](?:\s*\n)?/i, '');
+          }
+        }
+        return `<div class="markdown-alert markdown-alert-${alertType}">\n<p class="markdown-alert-title">${title}</p>\n${this.parser.parse(cloned)}</div>\n`;
+      }
+      return `<blockquote>\n${this.parser.parse(token.tokens)}</blockquote>\n`;
     }
   },
   extensions: [

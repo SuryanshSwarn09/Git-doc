@@ -1186,6 +1186,78 @@ body {
   margin-bottom: 16px;
 }
 
+/* GitHub Markdown Alerts */
+.preview-output .markdown-alert {
+  padding: 8px 16px;
+  margin-bottom: 16px;
+  border-left: 0.25em solid var(--color-border-default);
+  background-color: transparent;
+}
+
+.preview-output .markdown-alert .markdown-alert-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  margin-bottom: 4px;
+}
+
+.preview-output .markdown-alert > :last-child {
+  margin-bottom: 0;
+}
+
+.preview-output .markdown-alert-note {
+  border-left-color: #2f81f7;
+}
+.preview-output .markdown-alert-note .markdown-alert-title {
+  color: #2f81f7;
+}
+
+.preview-output .markdown-alert-tip {
+  border-left-color: #3fb950;
+}
+.preview-output .markdown-alert-tip .markdown-alert-title {
+  color: #3fb950;
+}
+
+.preview-output .markdown-alert-important {
+  border-left-color: #a371f7;
+}
+.preview-output .markdown-alert-important .markdown-alert-title {
+  color: #a371f7;
+}
+
+.preview-output .markdown-alert-warning {
+  border-left-color: #d29922;
+}
+.preview-output .markdown-alert-warning .markdown-alert-title {
+  color: #d29922;
+}
+
+.preview-output .markdown-alert-caution {
+  border-left-color: #f85149;
+}
+.preview-output .markdown-alert-caution .markdown-alert-title {
+  color: #f85149;
+}
+
+[data-theme="light"] .preview-output .markdown-alert-note { border-left-color: #0969da; }
+[data-theme="light"] .preview-output .markdown-alert-note .markdown-alert-title { color: #0969da; }
+
+[data-theme="light"] .preview-output .markdown-alert-tip { border-left-color: #1a7f37; }
+[data-theme="light"] .preview-output .markdown-alert-tip .markdown-alert-title { color: #1a7f37; }
+
+[data-theme="light"] .preview-output .markdown-alert-important { border-left-color: #8250df; }
+[data-theme="light"] .preview-output .markdown-alert-important .markdown-alert-title { color: #8250df; }
+
+[data-theme="light"] .preview-output .markdown-alert-warning { border-left-color: #9a6700; }
+[data-theme="light"] .preview-output .markdown-alert-warning .markdown-alert-title { color: #9a6700; }
+
+[data-theme="light"] .preview-output .markdown-alert-caution { border-left-color: #cf222e; }
+[data-theme="light"] .preview-output .markdown-alert-caution .markdown-alert-title { color: #cf222e; }
+
 .preview-output a { 
   color: var(--accent); 
   text-decoration: none; 
