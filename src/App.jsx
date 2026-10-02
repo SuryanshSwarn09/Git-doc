@@ -808,18 +808,6 @@ function App() {
             <span className="btn-label-full">{githubUser ? `@${githubUser.login}` : 'GitHub'}</span>
             <span className="btn-label-short">GH</span>
           </button>
-          <a
-            href="https://github.com/SuryanshSwarn09/Git-doc"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="action-btn github-repo-btn"
-            title="View Git-doc repository on GitHub (SuryanshSwarn09/Git-doc)"
-            aria-label="View Git-doc repository on GitHub"
-          >
-            <GitHubIcon size={15} />
-            <span className="btn-label-full">Repo</span>
-            <span className="btn-label-short">Repo</span>
-          </a>
           <button
             type="button"
             className={`action-btn zen-btn ${isZenMode ? 'active' : ''}`}
