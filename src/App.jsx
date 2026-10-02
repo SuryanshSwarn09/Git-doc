@@ -780,6 +780,18 @@ function App() {
             <span className="btn-label-full">{githubUser ? `@${githubUser.login}` : 'GitHub'}</span>
             <span className="btn-label-short">GH</span>
           </button>
+          <button
+            type="button"
+            className={`action-btn zen-btn ${isZenMode ? 'active' : ''}`}
+            onClick={() => setIsZenMode(prev => !prev)}
+            title="Zen Mode (Distraction-Free) [Esc to exit]"
+            aria-label="Toggle Zen Mode (Distraction-Free)"
+            aria-pressed={isZenMode}
+          >
+            <ZenModeIcon size={15} />
+            <span className="btn-label-full">Zen</span>
+            <span className="btn-label-short">Zen</span>
+          </button>
           <button 
             className="clear-btn" 
             onClick={handleClear} 
