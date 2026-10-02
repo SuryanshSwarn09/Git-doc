@@ -424,6 +424,18 @@ body {
   padding: 12px 32px;
 }
 
+/* Preview Mode (Read Only) — Full width presentation preview */
+.split-layout.layout-mode-preview .pane.preview-pane {
+  flex: 1;
+  max-width: 100%;
+}
+
+.split-layout.layout-mode-preview .preview-output {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 32px 48px;
+}
+
 .pane {
   flex: 1;
   display: flex;
