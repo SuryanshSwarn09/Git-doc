@@ -35,7 +35,8 @@ import {
   EditViewIcon,
   SplitViewIcon,
   PreviewViewIcon,
-  ChevronDownIcon
+  ChevronDownIcon,
+  InfoIcon
 } from './components/Icons.jsx';
 import PrintModal from './components/PrintModal.jsx';
 import GitHubModal from './components/GitHubModal.jsx';
