@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { GitHubIcon, CheckIcon, CheckCircleIcon } from './Icons.jsx';
 import {
   saveGitHubToken,
@@ -58,14 +58,17 @@ export default function GitHubModal({
   const [commitError, setCommitError] = useState('');
   const [commitResult, setCommitResult] = useState(null); // { htmlUrl, commitSha }
 
-  // Pre-fill filenames from current markdown title whenever modal opens
+  // Pre-fill filenames and owner from current state whenever modal opens
   useEffect(() => {
     if (isOpen && markdown) {
       const title = extractDocTitle(markdown);
       const slug = slugifyTitle(title);
       setGistFilename(`${slug}.md`);
-      setCommitPath(`${slug}.md`);
-      setCommitMessage(`docs: update ${slug}.md`);
+      setCommitPath((prev) => prev || `${slug}.md`);
+      setCommitMessage((prev) => prev || `docs: update ${slug}.md`);
+    }
+    if (isOpen && githubUser?.login) {
+      setCommitOwner((prev) => prev || githubUser.login);
     }
     if (isOpen) {
       setImportPreview(null);
@@ -76,7 +79,7 @@ export default function GitHubModal({
       setCommitError('');
       setConnectError('');
     }
-  }, [isOpen, markdown]);
+  }, [isOpen, markdown, githubUser]);
 
   if (!isOpen) return null;
 
@@ -93,6 +96,7 @@ export default function GitHubModal({
       const user = await verifyGitHubToken(patInput.trim());
       saveGitHubToken(patInput.trim());
       onUserChange(user);
+      setCommitOwner((prev) => prev || user.login);
       setPatInput('');
     } catch (err) {
       setConnectError(err.message);
@@ -133,6 +137,14 @@ export default function GitHubModal({
   const handleImportConfirm = () => {
     if (importPreview) {
       onImport(importPreview.content);
+      const parsed = parseGitHubUrl(importUrl.trim());
+      if (parsed) {
+        setCommitOwner(parsed.owner);
+        setCommitRepo(parsed.repo);
+        setCommitPath(parsed.path);
+        if (parsed.ref) setCommitBranch(parsed.ref);
+        setCommitMessage(`docs: update ${parsed.path}`);
+      }
       setImportPreview(null);
       setImportUrl('');
       onClose();
@@ -163,7 +175,34 @@ export default function GitHubModal({
   };
 
   const handleCommit = async () => {
-    if (!commitOwner.trim() || !commitRepo.trim()) {
+    let owner = commitOwner.trim();
+    let repo = commitRepo.trim();
+
+    // Auto-detect if user pasted full URL or "owner/repo" into either field
+    if (owner.includes('/') || owner.startsWith('http')) {
+      const parsed = parseGitHubUrl(owner);
+      if (parsed) {
+        owner = parsed.owner;
+        if (!repo) repo = parsed.repo;
+      } else {
+        const parts = owner.split('/');
+        owner = parts[0];
+        if (!repo && parts[1]) repo = parts[1];
+      }
+    }
+    if (repo.includes('/') || repo.startsWith('http')) {
+      const parsed = parseGitHubUrl(repo);
+      if (parsed) {
+        if (!owner) owner = parsed.owner;
+        repo = parsed.repo;
+      } else {
+        const parts = repo.split('/');
+        if (!owner && parts[0]) owner = parts[0];
+        if (parts[1]) repo = parts[1];
+      }
+    }
+
+    if (!owner || !repo) {
       setCommitError('Owner and repository name are required.');
       return;
     }
@@ -180,14 +219,14 @@ export default function GitHubModal({
     setCommitResult(null);
     try {
       const sha = await getFileSha({
-        owner: commitOwner.trim(),
-        repo: commitRepo.trim(),
+        owner,
+        repo,
         path: commitPath.trim(),
         branch: commitBranch.trim() || undefined,
       });
       const result = await commitFileToRepo({
-        owner: commitOwner.trim(),
-        repo: commitRepo.trim(),
+        owner,
+        repo,
         path: commitPath.trim(),
         content: markdown,
         message: commitMessage.trim() || `docs: update ${commitPath.trim()}`,
@@ -247,6 +286,7 @@ export default function GitHubModal({
           {tabs.map((tab) => (
             <button
               key={tab.id}
+              type="button"
               role="tab"
               aria-selected={activeTab === tab.id}
               className={`gh-tab ${activeTab === tab.id ? 'active' : ''}`}
@@ -272,7 +312,7 @@ export default function GitHubModal({
                   <CheckCircleIcon size={14} />
                   Connected
                 </div>
-                <button className="gh-disconnect-btn" onClick={handleDisconnect}>
+                <button type="button" className="gh-disconnect-btn" onClick={handleDisconnect}>
                   Disconnect
                 </button>
               </div>
@@ -303,6 +343,7 @@ export default function GitHubModal({
                 />
                 {connectError && <p className="gh-error-msg">{connectError}</p>}
                 <button
+                  type="button"
                   className="gh-primary-btn"
                   onClick={handleConnect}
                   disabled={connectLoading}
@@ -334,6 +375,7 @@ export default function GitHubModal({
                 spellCheck={false}
               />
               <button
+                type="button"
                 className="gh-primary-btn gh-fetch-btn"
                 onClick={handleImportFetch}
                 disabled={importLoading}
@@ -355,10 +397,10 @@ export default function GitHubModal({
                   {importPreview.content.slice(0, 120).replace(/\n/g, ' ')}…
                 </p>
                 <div className="gh-preview-actions">
-                  <button className="gh-primary-btn" onClick={handleImportConfirm}>
+                  <button type="button" className="gh-primary-btn" onClick={handleImportConfirm}>
                     <CheckIcon size={15} /> Replace Editor Content
                   </button>
-                  <button className="gh-secondary-btn" onClick={() => setImportPreview(null)}>
+                  <button type="button" className="gh-secondary-btn" onClick={() => setImportPreview(null)}>
                     Cancel
                   </button>
                 </div>
@@ -373,7 +415,7 @@ export default function GitHubModal({
             {!githubUser && (
               <div className="gh-warning-box">
                 ⚠️ Connect your GitHub account first to create Gists.
-                <button className="gh-inline-link" onClick={() => setActiveTab('connect')}>
+                <button type="button" className="gh-inline-link" onClick={() => setActiveTab('connect')}>
                   Go to Connect →
                 </button>
               </div>
@@ -399,12 +441,14 @@ export default function GitHubModal({
               <span className="gh-label" style={{ marginBottom: 0 }}>Visibility</span>
               <div className="gh-segmented">
                 <button
+                  type="button"
                   className={`gh-seg-btn ${!gistPublic ? 'active' : ''}`}
                   onClick={() => setGistPublic(false)}
                 >
                   🔒 Secret
                 </button>
                 <button
+                  type="button"
                   className={`gh-seg-btn ${gistPublic ? 'active' : ''}`}
                   onClick={() => setGistPublic(true)}
                 >
@@ -425,6 +469,7 @@ export default function GitHubModal({
               </div>
             )}
             <button
+              type="button"
               className="gh-primary-btn"
               onClick={handleCreateGist}
               disabled={gistLoading || !githubUser}
@@ -453,9 +498,11 @@ export default function GitHubModal({
                   id="gh-commit-owner"
                   type="text"
                   className="gh-input"
-                  placeholder="SuryanshSwarn09"
+                  placeholder="e.g. SuryanshSwarn09"
                   value={commitOwner}
                   onChange={(e) => setCommitOwner(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleCommit()}
+                  spellCheck={false}
                 />
               </div>
               <div className="gh-field">
@@ -464,9 +511,11 @@ export default function GitHubModal({
                   id="gh-commit-repo"
                   type="text"
                   className="gh-input"
-                  placeholder="Git-doc"
+                  placeholder="e.g. Git-doc"
                   value={commitRepo}
                   onChange={(e) => setCommitRepo(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleCommit()}
+                  spellCheck={false}
                 />
               </div>
             </div>
@@ -475,9 +524,11 @@ export default function GitHubModal({
               id="gh-commit-path"
               type="text"
               className="gh-input"
-              placeholder="docs/notes.md"
+              placeholder="e.g. README.md or docs/notes.md"
               value={commitPath}
               onChange={(e) => setCommitPath(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleCommit()}
+              spellCheck={false}
             />
             <label className="gh-label" htmlFor="gh-commit-branch">
               Branch <span className="gh-optional">(leave blank for default branch)</span>
@@ -489,6 +540,8 @@ export default function GitHubModal({
               placeholder="main"
               value={commitBranch}
               onChange={(e) => setCommitBranch(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleCommit()}
+              spellCheck={false}
             />
             <label className="gh-label" htmlFor="gh-commit-msg">Commit Message</label>
             <input
@@ -497,6 +550,7 @@ export default function GitHubModal({
               className="gh-input"
               value={commitMessage}
               onChange={(e) => setCommitMessage(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleCommit()}
             />
             {commitError && <p className="gh-error-msg">{commitError}</p>}
             {commitResult && (
@@ -512,19 +566,31 @@ export default function GitHubModal({
                 </div>
               </div>
             )}
-            <button
-              className="gh-primary-btn"
-              onClick={handleCommit}
-              disabled={commitLoading || !githubUser}
-            >
-              {commitLoading ? <span className="gh-spinner" /> : <GitHubIcon size={15} />}
-              {commitLoading ? 'Pushing…' : 'Push Commit'}
-            </button>
+            <div className="gh-preview-actions">
+              <button
+                type="button"
+                className="gh-primary-btn"
+                onClick={handleCommit}
+                disabled={commitLoading || !githubUser}
+              >
+                {commitLoading ? <span className="gh-spinner" /> : <GitHubIcon size={15} />}
+                {commitLoading ? 'Pushing…' : 'Push Commit'}
+              </button>
+              {commitResult && (
+                <button
+                  type="button"
+                  className="gh-secondary-btn"
+                  onClick={onClose}
+                >
+                  Done
+                </button>
+              )}
+            </div>
           </div>
         )}
 
         {/* Footer close */}
-        <button className="modal-close-btn" onClick={onClose}>Close</button>
+        <button type="button" className="modal-close-btn" onClick={onClose}>Close</button>
       </div>
     </div>
   );
