@@ -719,8 +719,8 @@ function App() {
         </div>
       </div>
 
-      <div className="split-layout">
-        <div className="pane editor-pane">
+      <div className={`split-layout layout-mode-${viewMode}`}>
+        <div className={`pane editor-pane ${viewMode === 'preview' ? 'layout-pane-hidden' : ''} ${viewMode === 'editor' ? 'layout-pane-focused' : ''}`}>
           <div className="pane-header">
             <div className="pane-title-group">
               <span className="pane-title">Markdown Editor</span>
@@ -757,7 +757,7 @@ function App() {
           />
         </div>
 
-        <div className="pane preview-pane">
+        <div className={`pane preview-pane ${viewMode === 'editor' ? 'layout-pane-hidden' : ''} ${viewMode === 'preview' ? 'layout-pane-focused' : ''}`}>
           <div className="pane-header">
             <span className="pane-title">Live Preview</span>
           </div>
