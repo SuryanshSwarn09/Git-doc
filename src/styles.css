@@ -1205,6 +1205,25 @@ body {
   color: var(--accent-hover);
 }
 
+/* GitHub Flavored Markdown (GFM) User Mentions */
+.preview-output .user-mention {
+  font-weight: 600;
+  color: var(--text-main);
+  background-color: var(--color-border-subtle);
+  border-radius: 4px;
+  padding: 1px 5px;
+  text-decoration: none !important;
+  border: 1px solid transparent;
+  transition: all 0.15s ease;
+}
+
+.preview-output .user-mention:hover {
+  color: var(--accent);
+  background-color: rgba(47, 129, 247, 0.12);
+  border-color: rgba(47, 129, 247, 0.4);
+  text-decoration: none !important;
+}
+
 /* --- FOOTER LINKS --- */
 .footer-links {
   display: flex;

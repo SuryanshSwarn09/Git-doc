@@ -84,7 +84,32 @@ markedParser.use({
       const slug = slugifyHeading(item.text, headingSlugCounts);
       return `<h${item.depth} id="${slug}">${text}</h${item.depth}>\n`;
     }
-  }
+  },
+  extensions: [
+    {
+      name: 'mention',
+      level: 'inline',
+      start(src) {
+        const match = src.match(/(?:^|[\s(])@/);
+        if (!match) return -1;
+        return match.index + (match[0].startsWith('@') ? 0 : 1);
+      },
+      tokenizer(src) {
+        const rule = /^@([a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38})\b/;
+        const match = rule.exec(src);
+        if (match) {
+          return {
+            type: 'mention',
+            raw: match[0],
+            username: match[1]
+          };
+        }
+      },
+      renderer(token) {
+        return `<a href="https://github.com/${token.username}" class="user-mention" target="_blank" rel="noopener noreferrer">@${token.username}</a>`;
+      }
+    }
+  ]
 });
 
 // Automatically open external links in a new tab safely and enforce noopener noreferrer on all target="_blank"
