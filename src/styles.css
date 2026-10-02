@@ -398,6 +398,30 @@ body {
   flex: 1;
   gap: 24px;
   min-height: 0;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* --- VIEW MODE LAYOUT MODIFIERS --- */
+.layout-pane-hidden {
+  display: none !important;
+}
+
+/* Write Mode (Editor Only) - Focused typing experience with centered comfortable column */
+.split-layout.layout-mode-editor .pane.editor-pane {
+  flex: 1;
+  max-width: 100%;
+}
+
+.split-layout.layout-mode-editor .editor-input {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 32px 40px;
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+.split-layout.layout-mode-editor .pane-header {
+  padding: 12px 32px;
 }
 
 .pane {
