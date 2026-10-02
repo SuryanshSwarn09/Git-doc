@@ -81,6 +81,18 @@ export default function GitHubModal({
     }
   }, [isOpen, markdown, githubUser]);
 
+  // Close on Escape key press
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   // ── Handlers ────────────────────────────────────────────────────────
@@ -279,6 +291,15 @@ export default function GitHubModal({
               className="gh-avatar"
             />
           )}
+          <button
+            type="button"
+            className="gh-modal-close-btn"
+            onClick={onClose}
+            aria-label="Close modal"
+            title="Close (Esc)"
+          >
+            &times;
+          </button>
         </div>
 
         {/* Tabs */}
@@ -342,15 +363,24 @@ export default function GitHubModal({
                   spellCheck={false}
                 />
                 {connectError && <p className="gh-error-msg">{connectError}</p>}
-                <button
-                  type="button"
-                  className="gh-primary-btn"
-                  onClick={handleConnect}
-                  disabled={connectLoading}
-                >
-                  {connectLoading ? <span className="gh-spinner" /> : <CheckIcon size={15} />}
-                  {connectLoading ? 'Verifying…' : 'Verify & Connect'}
-                </button>
+                <div className="gh-preview-actions">
+                  <button
+                    type="button"
+                    className="gh-primary-btn"
+                    onClick={handleConnect}
+                    disabled={connectLoading}
+                  >
+                    {connectLoading ? <span className="gh-spinner" /> : <CheckIcon size={15} />}
+                    {connectLoading ? 'Verifying…' : 'Verify & Connect'}
+                  </button>
+                  <button
+                    type="button"
+                    className="gh-secondary-btn"
+                    onClick={onClose}
+                  >
+                    Cancel
+                  </button>
+                </div>
               </>
             )}
           </div>
@@ -468,15 +498,24 @@ export default function GitHubModal({
                 </div>
               </div>
             )}
-            <button
-              type="button"
-              className="gh-primary-btn"
-              onClick={handleCreateGist}
-              disabled={gistLoading || !githubUser}
-            >
-              {gistLoading ? <span className="gh-spinner" /> : <GitHubIcon size={15} />}
-              {gistLoading ? 'Creating…' : 'Create Gist'}
-            </button>
+            <div className="gh-preview-actions">
+              <button
+                type="button"
+                className="gh-primary-btn"
+                onClick={handleCreateGist}
+                disabled={gistLoading || !githubUser}
+              >
+                {gistLoading ? <span className="gh-spinner" /> : <GitHubIcon size={15} />}
+                {gistLoading ? 'Creating…' : 'Create Gist'}
+              </button>
+              <button
+                type="button"
+                className="gh-secondary-btn"
+                onClick={onClose}
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         )}
 
@@ -576,21 +615,16 @@ export default function GitHubModal({
                 {commitLoading ? <span className="gh-spinner" /> : <GitHubIcon size={15} />}
                 {commitLoading ? 'Pushing…' : 'Push Commit'}
               </button>
-              {commitResult && (
-                <button
-                  type="button"
-                  className="gh-secondary-btn"
-                  onClick={onClose}
-                >
-                  Done
-                </button>
-              )}
+              <button
+                type="button"
+                className="gh-secondary-btn"
+                onClick={onClose}
+              >
+                {commitResult ? 'Done' : 'Cancel'}
+              </button>
             </div>
           </div>
         )}
-
-        {/* Footer close */}
-        <button type="button" className="modal-close-btn" onClick={onClose}>Close</button>
       </div>
     </div>
   );
