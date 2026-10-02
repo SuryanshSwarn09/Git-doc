@@ -98,8 +98,31 @@ DOMPurify.addHook('afterSanitizeAttributes', (node) => {
 
 const EXAMPLE_MD = `this app is coded by @SuryanshSwarn`;
 const DRAFT_STORAGE_KEY = 'markdown-pdf:draft';
+const VIEW_MODE_KEY = 'gitdoc_view_mode';
+
+const getInitialViewMode = () => {
+  try {
+    const saved = localStorage.getItem(VIEW_MODE_KEY);
+    if (saved === 'editor' || saved === 'preview' || saved === 'split') {
+      return saved;
+    }
+  } catch {
+    // fallback to default
+  }
+  return 'split';
+};
 
 function App() {
+  const [viewMode, setViewMode] = useState(getInitialViewMode);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(VIEW_MODE_KEY, viewMode);
+    } catch {
+      // ignore storage errors
+    }
+  }, [viewMode]);
+
   const [markdown, setMarkdown] = useState(() => {
     try {
       const saved = localStorage.getItem(DRAFT_STORAGE_KEY);
