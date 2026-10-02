@@ -1,110 +1,171 @@
-# MARKDOWN LATEX PDF GENERATOR
-*A minimal web app to preview Markdown and LaTeX math instantly.*
+﻿# MARKDOWN LATEX PDF GENERATOR — GitHub Edition
+*A Markdown + LaTeX editor with live preview, PDF export, and full GitHub API integration.*
 
-**Project:01**
-_March 2026_
+**Project:01 — GitHub Developer Program Edition**
+_March 2026 → October 2026_
 
 ### Live demo: [Markdown Latex Pdf](https://markdown-pdf-self.vercel.app/)
+### Repository: [SuryanshSwarn09/Git-doc](https://github.com/SuryanshSwarn09/Git-doc)
 ---
 
 ![Article cover](https://media2.dev.to/dynamic/image/width=1000,height=420,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.amazonaws.com%2Fuploads%2Farticles%2Fc8v4m7qd6tv1drasw3il.png)
 
 ### Dev.to article: [Stop Fighting AI Formatting: How I Built a "Sanitizer" for Messy AI Markdown](https://dev.to/suryansh_swarn/stop-fighting-ai-formatting-how-i-built-a-sanitizer-for-messy-ai-markdown-3ooh)
 
-> This project is developed throughout march 2026 to achieve practical fluency, increase my learning and getting comfortable with the framework and language also i am writing every update i have done with dates in this webapp.
+> This project started in March 2026 as a practical Markdown + LaTeX editor. In October 2026 it was extended with a full **GitHub API integration** as part of the GitHub Developer Program — enabling users to import files from repos, save drafts as Gists, and commit Markdown directly to GitHub, all from inside the editor.
 
-### Tech stack 
-_`React` `Vite` `marked.js` `highlight.js` `KaTeX` `DOMPurify`_
+### Tech stack
+_`React` `Vite` `marked.js` `highlight.js` `KaTeX` `DOMPurify` `GitHub REST API`_
 
 ---
-### Features:
 
-* **Automatic Table of Contents (TOC) Generator:** One-click toolbar button `[TOC]` that parses all `#`, `##`, and `###` headings across the document (safely ignoring code blocks and LaTeX math formulas), generates a nested, hyperlinked Markdown list with GitHub-compatible anchor slugs, and enables instant smooth-scrolling anchor navigation in the live preview pane. Intelligently updates existing TOC blocks in place and preserves browser `Ctrl+Z` undo history.
-* **Custom Print Running Header/Footer & Dynamic Page Numbers:** Pre-print layout options enabling running multi-page headers and footers across printed documents and exported PDFs:
-  * **Running Header:** Customizable document title, author, or organization notice (e.g. *"Antigravity Research Group • Confidential"*) repeating across the top margin of each page with optional print date stamps.
-  * **Running Footer & Dynamic Page Numbers:** Muted footer notice (e.g. *"Confidential & Proprietary"*) with automated dynamic page numbering (`Page X` via CSS counters and `@page { @bottom-right }` margin boxes).
-  * **Adaptive `@page` Margin Allocation:** Automatically expands top and bottom margins (up to 22mm–32mm) when headers or footers are toggled active, preventing document headings and text from overlapping running elements.
-  * **Preset Integrations & Persistence:** Pre-configured in "Academic Paper" and "Technical Report" presets, and automatically persisted in `localStorage`.
-* **Interactive Print Layout Customizer (Academic vs Minimalist):** Pre-print modal before `window.print()` allowing dynamic publication formatting:
-  * **Multi-Column Flow:** Toggle between 1-Column standard and 2-Column academic paper format with vertical column rule separators and span-all paper titles.
-  * **Paper Size & Margins:** Toggle between US Letter and A4 page sizing with Normal (15mm), Compact (10mm), and Wide (25mm) page margins dynamically injected into `@page` rules.
-  * **Hierarchical Heading Numbering:** Automatically prefixes headings (`1.0`, `1.1`, `1.2`, `2.0`) with CSS counters for IEEE/ACM academic or technical reports without altering source Markdown.
-  * **Curated Presets & Persistence:** One-click presets ("Standard Document", "Academic Paper", "Technical Report") with automatic `localStorage` persistence.
-* **Synchronized Dual-Pane Scrolling (Scroll-Sync):** Real-time proportional scrolling between the Markdown editor and live preview pane with mutual recursion lock and a convenient `[⇕ Sync Scroll: ON / OFF]` header toggle persisted in `localStorage`.
-* **Multi-Tiered Responsive Layout Engine:** Fluid responsiveness across all viewports (Desktops, Compact Laptops, Tablets, and Mobile phones). Automatically adapts top-bar controls—from full-width single-line on 1200px+ down to compact labels on 880px–1200px, 2-tier stacked layouts on tablets, and horizontal scrollable ribbons with balanced action grids on mobile—eliminating button collision and cramped UI.
-* **Professional SVG Iconography & Liquid Glass Hierarchy:** Replaced OS-inconsistent emojis with crisp, zero-dependency SVG vector icons (`viewBox="0 0 24 24"`, 1.75px stroke, inheriting `currentColor`) coupled with Apple Liquid Glass micro-interactions, primary accent glow, and subtle danger hover states.
-* **Hardened Content Security Policy:** Strict HTTP CSP headers prohibiting `'unsafe-inline'` script execution.
+## GitHub Integration (New — October 2026)
+
+This version adds a dedicated **GitHub panel** accessible via the `GitHub` button in the top action bar. It connects to three GitHub REST API endpoints using a Personal Access Token (PAT) stored securely in `localStorage`.
+
+### Features
+
+#### Connect — PAT Authentication
+- Paste a GitHub Personal Access Token to authenticate
+- Token is verified live against `GET /user` and displays your avatar + username on success
+- Session is silently restored on every page load from `localStorage`
+- One-click **Disconnect** to revoke the session
+
+#### Import — Fetch Markdown from Any GitHub URL
+- Paste any of the following and the app fetches and decodes the file automatically:
+  - `https://github.com/owner/repo/blob/branch/path/to/file.md`
+  - `https://raw.githubusercontent.com/owner/repo/branch/path/to/file.md`
+  - `https://github.com/owner/repo` — auto-fetches `README.md`
+  - `owner/repo` shorthand — auto-fetches `README.md`
+- Shows a preview card (filename, size, content snippet) before loading
+- Public repos work **without a token**; private repos require a connected PAT
+- All imported content routes through the **existing DOMPurify sanitization pipeline** — no XSS risk
+
+#### Gist — Save Draft as a GitHub Gist
+- Saves the current editor content as a new GitHub Gist
+- Filename is pre-filled from the document top heading (slugified)
+- Toggle between **Public** and **Secret** visibility
+- Optional description field
+- Returns a direct link to the created Gist on success
+
+#### Commit — Push to a Repository
+- Commit the current Markdown file directly to any GitHub repo you have write access to
+- Fields: Owner, Repository, File Path, Branch (optional), Commit Message
+- Auto-detects whether the file already exists (fetches SHA via `GET /repos/.../contents/...`) and sends a create or update accordingly
+- Returns a direct link to the committed file on GitHub
+
+### GitHub API Endpoints Used
+
+| Feature | Method | Endpoint |
+|---|---|---|
+| Token verification | `GET` | `/user` |
+| Import file | `GET` | `/repos/{owner}/{repo}/contents/{path}` |
+| Get file SHA (for updates) | `GET` | `/repos/{owner}/{repo}/contents/{path}` |
+| Create Gist | `POST` | `/gists` |
+| Commit file | `PUT` | `/repos/{owner}/{repo}/contents/{path}` |
+
+### Setup — Getting a Personal Access Token
+
+1. Go to [github.com/settings/tokens/new](https://github.com/settings/tokens/new)
+2. Give it a name (e.g. `markdown-editor`)
+3. Select scopes: `repo` (for commits) and `gist` (for Gists)
+4. Click **Generate token** and copy it
+5. Open the app → click **GitHub** → paste in the **Connect** tab
+
+> **Security note:** The token is stored only in your browser's `localStorage` and is only ever sent to `api.github.com` over HTTPS. The app has no backend and does not transmit your token anywhere else.
+
+### New Files Added
+
+| File | Purpose |
+|---|---|
+| `src/utils/githubApi.js` | All GitHub REST API calls, PAT storage, URL parsing |
+| `src/components/GitHubModal.jsx` | 4-tab modal UI (Connect / Import / Gist / Commit) |
+| `src/components/Icons.jsx` | `GitHubIcon` SVG appended |
+| `src/App.jsx` | GitHub button, `githubUser` state, on-mount token restore |
+| `src/styles.css` | `gh-` prefixed CSS (button, modal, tabs, cards, spinner) |
+
+---
+
+## All Features
+
+* **GitHub Integration:** Import Markdown from any public or private repo, save drafts as Gists, and commit files to repositories without leaving the editor. Uses the GitHub REST API with PAT authentication. _(October 2026)_
+* **Automatic Table of Contents (TOC) Generator:** One-click toolbar button that parses all `#`, `##`, and `###` headings (safely ignoring code blocks and LaTeX math), generates a nested hyperlinked Markdown list with GitHub-compatible anchor slugs, and enables smooth-scrolling navigation in the live preview. Intelligently updates existing TOC blocks in place and preserves browser `Ctrl+Z` undo history.
+* **Custom Print Running Header/Footer & Dynamic Page Numbers:** Pre-print layout options enabling running multi-page headers and footers across printed documents and exported PDFs with adaptive `@page` margin allocation and preset persistence.
+* **Interactive Print Layout Customizer:** Pre-print modal allowing dynamic publication formatting — multi-column flow, paper size & margins, hierarchical heading numbering, and curated presets with `localStorage` persistence.
+* **Synchronized Dual-Pane Scrolling (Scroll-Sync):** Real-time proportional scrolling between the Markdown editor and live preview with mutual recursion lock and a toggle persisted in `localStorage`.
+* **Multi-Tiered Responsive Layout Engine:** Fluid responsiveness across all viewports from 1600px desktops down to mobile with balanced action grids.
+* **Professional SVG Iconography & Liquid Glass Hierarchy:** Crisp, zero-dependency SVG vector icons with Apple Liquid Glass micro-interactions and accent glow.
+* **Hardened Content Security Policy:** Strict HTTP CSP headers prohibiting `unsafe-inline` script execution.
 * **Export Sandbox Protection:** Standalone `.html` exports embed an isolated CSP (`default-src 'none'`) preventing arbitrary script execution.
-* **Universal Tabnabbing Defense:** Automatic `rel="noopener noreferrer"` enforcement across all external and user-supplied `target="_blank"` anchors.
-* **Theme Persistence & OS Auto-Detection:** Automatically detects system color preference (`prefers-color-scheme`) and persists user theme choices to `localStorage`.
-* **Adaptive Code Highlighting:** Code blocks and syntax tokens adapt seamlessly to Light and Dark themes via CSS variables—eliminating clashing dark boxes in light mode with zero stylesheet load latency.
-* **Publication Print Typography:** Optimized `@media print` layout replacing bulky fonts with standard publication sizing (10.5pt body, 9.5pt code), page-break avoidance on headings and blocks, and syntax color preservation.
-* **One-Click Markdown Download (`.md`):** Instant download of the active document with smart filename slugification derived from the top heading.
-* **Standalone HTML Export (`.html`):** Export complete, self-contained HTML documents with inlined KaTeX math stylesheets and publication typography for offline reading and sharing.
-* **Rich HTML Clipboard Copy:** One-click button copying rich HTML to the clipboard (supporting both `text/html` and `text/plain`) with visual feedback, ready to paste directly into Medium, Dev.to, Google Docs, or email.
-* **Auto-Save & Recovery:** Continuous `localStorage` persistence with a visual `✓ Saved` indicator; drafts seamlessly restore across refreshes and restarts.
-* **Accidental Clear Protection:** Two-step confirmation modal on Clear and an instant `↩ Undo Clear` restore action to prevent data loss.
-* **Preserved Undo History (`Ctrl+Z` / `Cmd+Z`):** Toolbar formatting preserves the browser's native `<textarea>` undo/redo history.
-* **Tab & Shift+Tab Indentation:** Indent and unindent code and text by 2 spaces (supporting multi-line blocks) without losing editor focus.
-* **Live Document Metrics:** Real-time word count, character count, and estimated reading time badges in the editor header.
-* **Modular Code Highlighting:** Fast, lightweight syntax color-coding via modular Highlight.js core supporting Web, Scripting, Backend, and Systems languages with graceful fallback.
-* **AI Auto-Formatter:** Safely sanitizes AI-generated LaTeX math delimiters (`\[...\]` and `\(...\)`) while preserving code blocks, inline code, and JSON structures.
+* **Universal Tabnabbing Defense:** Automatic `rel="noopener noreferrer"` on all `target="_blank"` anchors.
+* **Theme Persistence & OS Auto-Detection:** Detects `prefers-color-scheme` and persists user theme choices to `localStorage`.
+* **Adaptive Code Highlighting:** Syntax tokens adapt to Light and Dark themes via CSS variables with zero stylesheet load latency.
+* **Publication Print Typography:** Optimized `@media print` layout with standard sizing (10.5pt body, 9.5pt code) and page-break avoidance.
+* **One-Click Markdown Download (`.md`):** Instant download with smart filename slugification from the top heading.
+* **Standalone HTML Export (`.html`):** Self-contained HTML documents with inlined KaTeX math stylesheets for offline reading.
+* **Rich HTML Clipboard Copy:** Copies rich HTML to the clipboard (supporting `text/html` and `text/plain`) ready to paste into Medium, Dev.to, Google Docs, or email.
+* **Auto-Save & Recovery:** Continuous `localStorage` persistence with a visual `Saved` indicator; drafts restore across refreshes.
+* **Accidental Clear Protection:** Two-step confirmation modal and an instant `Undo Clear` restore action.
+* **Preserved Undo History (`Ctrl+Z` / `Cmd+Z`):** Toolbar formatting preserves the browser native textarea undo/redo history.
+* **Tab & Shift+Tab Indentation:** Indent/unindent by 2 spaces without losing editor focus.
+* **Live Document Metrics:** Real-time word count, character count, and estimated reading time badges.
+* **AI Auto-Formatter:** Sanitizes AI-generated LaTeX math delimiters while preserving code blocks and inline code.
 * **XSS Defense:** Full DOMPurify sanitization pipeline securing rendered preview output.
 * **Zero-Lag Typing:** React 19 `useDeferredValue` decoupling keystroke input from math parsing and syntax rendering.
-* **Code-Split Architecture:** Main app entry trimmed to <13 kB with isolated vendor bundles for React, KaTeX, Markdown, and Highlighting.
-* **Smart Toolbar:** One-click insertion for formatting, code blocks, and equations.
-* **Liquid Glass UI:** Responsive, Apple-inspired frosted glass aesthetic with Light/Dark modes.
-* **PWA:** _`10 May 26`_ Look at the far right side of the URL address bar. You should now see a little screen icon with a down arrow. If you hover over it, it will say "Install markdown-pdf".
-* **Comprehensive Test Suite:** 10 unit test suites (`npm test`) covering math sanitization, syntax highlighting, document metrics, keyboard indentation, export utilities, theme persistence, scroll synchronization, print layout customizer options, automatic Table of Contents generation, and print media query rendering.
+* **PWA:** Installable from the browser address bar.
+* **Comprehensive Test Suite:** 10 unit test suites (`npm test`) covering math sanitization, syntax highlighting, document metrics, keyboard indentation, export utilities, theme persistence, scroll sync, print layout, TOC generation, and print rendering.
 
 ---
 
 ### Scripts
 
-* `npm run dev` - Start local development server
-* `npm run build` - Produce code-split production bundle
-* `npm test` - Run full unit test suite
-* `npm run lint` - Run ESLint checks
+* `npm run dev` — Start local development server
+* `npm run build` — Produce code-split production bundle
+* `npm test` — Run full unit test suite
+* `npm run lint` — Run ESLint checks
 
 ---
 
-
-> Funcfact: this readme file is also edited first on the [markdown-pdf](https://url.com) webapp after that i pasted the result in vscode.
+> Funfact: this readme file is also edited first on the [markdown-pdf](https://markdown-pdf-self.vercel.app/) webapp, then pasted into VS Code.
 
 ---
 
-### Flow:
+### Architecture Flow
 
 ```mermaid
 graph TD
-    %% User Interaction
-    A[User Input] -->|Types keystroke| B(React useState)
-    
-    %% Processing Pipeline
-    B -->|Raw String| C[AI Math Sanitizer & Code Masker]
+    GH_URL[GitHub URL / owner/repo] -->|parseGitHubUrl| GH_API[githubApi.js]
+    GH_API -->|GET /repos/.../contents/...| GH_FETCH[Fetched Markdown]
+    GH_FETCH -->|onImport| A
+
+    A[User Input / Editor] -->|Types or imports| B(React useState)
+
+    B -->|Raw String| C[AI Math Sanitizer and Code Masker]
     C -->|Sanitized String| D{Marked.js Parser}
-    
-    %% Parser Extensions
+
     D -->|Markdown Math| E[KaTeX Engine]
     D -->|Code Blocks| F[Highlight.js Engine]
     D -->|Standard Markdown| G[HTML Generator]
-    
-    %% Output & Security Pipeline
+
     E --> H((Raw HTML Output))
     F --> H
     G --> H
-    
+
     H -->|HTML Sanitization| I[DOMPurify Engine]
     I -->|Safe HTML| J[dangerouslySetInnerHTML]
     J --> K[Live DOM Preview]
 
-    %% Styling
+    B -->|POST /gists| GIST[GitHub Gist]
+    B -->|PUT /repos/.../contents/...| COMMIT[GitHub Repo Commit]
+
     classDef default fill:#f9f9f9,stroke:#333,stroke-width:2px;
     classDef react fill:#61dafb,stroke:#000,color:#000;
     classDef logic fill:#f5a623,stroke:#000,color:#fff;
     classDef security fill:#2ecc71,stroke:#000,color:#fff;
-    
+    classDef github fill:#24292e,stroke:#fff,color:#fff;
+
     class B,J react;
     class C,D logic;
     class I security;
+    class GH_API,GH_FETCH,GIST,COMMIT github;
 ```
