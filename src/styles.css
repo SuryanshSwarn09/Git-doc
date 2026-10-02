@@ -921,12 +921,19 @@ body {
   transition: all 0.3s ease;
 }
 
-.status-bar-left,
+.status-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+}
+
 .status-bar-right {
   display: flex;
   align-items: center;
   gap: 10px;
-  flex-wrap: wrap;
+  flex-shrink: 0;
 }
 
 .status-item {
@@ -940,22 +947,31 @@ body {
 }
 
 .status-save-pill {
-  color: #34c759;
+  color: var(--color-primer-green);
   font-weight: 600;
   display: inline-flex;
   align-items: center;
   gap: 5px;
+  flex-shrink: 0;
 }
 
 .status-save-pill svg {
-  color: #34c759;
+  color: var(--color-primer-green);
   flex-shrink: 0;
+}
+
+[data-theme="dark"] .status-save-pill {
+  color: #3fb950;
+}
+
+[data-theme="dark"] .status-save-pill svg {
+  color: #3fb950;
 }
 
 .status-doc-name {
   color: var(--text-main);
   font-weight: 600;
-  max-width: 240px;
+  max-width: 280px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -965,7 +981,7 @@ body {
 .status-divider {
   width: 1px;
   height: 14px;
-  background-color: var(--glass-border);
+  background-color: var(--color-border-default);
   flex-shrink: 0;
 }
 
