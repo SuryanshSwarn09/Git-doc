@@ -782,29 +782,7 @@ function App() {
       <div className={`split-layout layout-mode-${viewMode}`}>
         <div className={`pane editor-pane ${viewMode === 'preview' ? 'layout-pane-hidden' : ''} ${viewMode === 'editor' ? 'layout-pane-focused' : ''}`}>
           <div className="pane-header">
-            <div className="pane-title-group">
-              <span className="pane-title">Markdown Editor</span>
-              <span className="save-status-pill" title="Saved locally in browser storage">
-                <CheckCircleIcon size={12} />
-                <span>{saveStatus}</span>
-              </span>
-              <button
-                type="button"
-                className={`sync-scroll-btn ${syncScroll ? 'active' : ''}`}
-                onClick={() => setSyncScroll(prev => !prev)}
-                title={`Synchronized Scrolling: ${syncScroll ? 'ON' : 'OFF'} (Click to toggle)`}
-                aria-pressed={syncScroll}
-                aria-label="Toggle synchronized scrolling"
-              >
-                <SyncScrollIcon size={13} />
-                <span>Sync Scroll: {syncScroll ? 'ON' : 'OFF'}</span>
-              </button>
-            </div>
-            <div className="doc-stats">
-              <span className="stat-pill" title="Word count">{stats.words} words</span>
-              <span className="stat-pill" title="Character count">{stats.characters} chars</span>
-              <span className="stat-pill stat-time" title="Estimated reading time">{stats.readingTime}</span>
-            </div>
+            <span className="pane-title">Markdown</span>
           </div>
           <textarea
             ref={editorRef}
@@ -819,7 +797,7 @@ function App() {
 
         <div className={`pane preview-pane ${viewMode === 'editor' ? 'layout-pane-hidden' : ''} ${viewMode === 'preview' ? 'layout-pane-focused' : ''}`}>
           <div className="pane-header">
-            <span className="pane-title">Live Preview</span>
+            <span className="pane-title">Preview</span>
           </div>
 
           {/* Running Print Header */}
