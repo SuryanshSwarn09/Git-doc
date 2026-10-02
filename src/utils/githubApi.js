@@ -1,4 +1,4 @@
-﻿/**
+/**
  * GitHub API utilities using raw fetch (no external SDK).
  * Supports: file fetching, gist creation, and repo file commits.
  * Authentication: GitHub Personal Access Token (PAT) stored in localStorage.
@@ -154,7 +154,9 @@ export async function createGist({ content, filename = 'document.md', descriptio
 // ─── API: Get File SHA ────────────────────────────────────────────────────────
 
 export async function getFileSha({ owner, repo, path, branch }) {
-  let endpoint = `${GITHUB_API_BASE}/repos/${owner}/${repo}/contents/${path}`;
+  const cleanPath = (path || '').replace(/^\/+/, '');
+  const safePath = encodeURIComponent(cleanPath).replace(/%2F/g, '/');
+  let endpoint = `${GITHUB_API_BASE}/repos/${owner}/${repo}/contents/${safePath}`;
   if (branch) endpoint += `?ref=${encodeURIComponent(branch)}`;
   const response = await fetch(endpoint, { headers: buildHeaders() });
   if (response.status === 404) return null;
@@ -170,11 +172,12 @@ export async function commitFileToRepo({ owner, repo, path, content, message, br
   if (!token) throw new Error('A GitHub token is required to commit files. Add one in GitHub Settings.');
 
   const encoded = btoa(unescape(encodeURIComponent(content)));
-  const body = { message: message || `Update ${path}`, content: encoded };
+  const cleanPath = (path || '').replace(/^\/+/, '');
+  const body = { message: message || `Update ${cleanPath}`, content: encoded };
   if (branch) body.branch = branch;
   if (sha) body.sha = sha;
 
-  const safePath = encodeURIComponent(path).replace(/%2F/g, '/');
+  const safePath = encodeURIComponent(cleanPath).replace(/%2F/g, '/');
   const response = await fetch(`${GITHUB_API_BASE}/repos/${owner}/${repo}/contents/${safePath}`, {
     method: 'PUT',
     headers: { ...buildHeaders(token), 'Content-Type': 'application/json' },
@@ -192,6 +195,6 @@ export async function commitFileToRepo({ owner, repo, path, content, message, br
   const data = await response.json();
   return {
     commitSha: data.commit?.sha || '',
-    htmlUrl: data.content?.html_url || '',
+    htmlUrl: data.content?.html_url || data.commit?.html_url || '',
   };
 }
