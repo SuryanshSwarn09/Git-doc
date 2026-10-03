@@ -9,6 +9,8 @@ import {
   createGist,
   getFileSha,
   commitFileToRepo,
+  normalizeOwner,
+  normalizeRepo,
 } from '../utils/githubApi.js';
 import { extractDocTitle, slugifyTitle } from '../utils/exportUtils.js';
 
@@ -213,6 +215,9 @@ export default function GitHubModal({
         if (parts[1]) repo = parts[1];
       }
     }
+
+    owner = normalizeOwner(owner);
+    repo = normalizeRepo(repo);
 
     if (!owner || !repo) {
       setCommitError('Owner and repository name are required.');
