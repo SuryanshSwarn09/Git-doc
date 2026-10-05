@@ -746,6 +746,8 @@ function App() {
             <span>Files</span>
           </button>
 
+          <div className="divider nav-divider"></div>
+
           <div className="view-mode-selector" role="radiogroup" aria-label="View Mode">
             <button
               type="button"
@@ -829,14 +831,6 @@ function App() {
               aria-label="Generate Table of Contents"
             >
               <TocIcon size={15} />
-            </button>
-            <button 
-              className="format-btn template-btn" 
-              onClick={() => setIsTemplateModalOpen(true)} 
-              title="GitHub Issue, PR & Readme Templates" 
-              aria-label="GitHub Templates Gallery"
-            >
-              <TemplateIcon size={15} />
             </button>
           </div>
           <div className="divider"></div>

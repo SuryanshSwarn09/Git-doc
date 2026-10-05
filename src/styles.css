@@ -176,29 +176,45 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 14px;
-  gap: 14px;
+  padding: 6px 14px;
+  gap: 12px;
+  min-height: 48px;
 }
 
 .top-bar-left {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
   flex-shrink: 0;
+  min-width: 0;
 }
 
 .top-bar-center {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: safe center;
   flex: 1;
   min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 0 4px;
+}
+
+.top-bar-center::-webkit-scrollbar {
+  display: none;
 }
 
 .top-bar-right {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.nav-divider {
+  height: 20px;
+  margin: 0 2px;
   flex-shrink: 0;
 }
 
@@ -278,19 +294,20 @@ body {
 .view-mode-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 0 10px;
+  gap: 5px;
+  padding: 0 8px;
   height: 26px;
   background: transparent;
   color: var(--text-muted);
   border: 1px solid transparent;
   border-radius: 4px;
   font-family: inherit;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 500;
   cursor: pointer;
   user-select: none;
   -webkit-user-select: none;
+  white-space: nowrap;
   transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -321,9 +338,11 @@ body {
 
 /* --- GITHUB MARKDOWN TOOLBAR --- */
 .toolbar {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 3px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .toolbar-group {
@@ -3098,8 +3117,8 @@ body {
    Adapts for laptops, tablets, and mobile devices
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* Laptops & Desktops (< 1280px) */
-@media screen and (max-width: 1280px) {
+/* Standard Laptops & Scaled High-DPI Desktops (< 1536px) */
+@media screen and (max-width: 1536px) {
   .btn-label-full {
     display: none;
   }
@@ -3121,6 +3140,19 @@ body {
   }
 }
 
+/* Medium Laptops & Compact Desktops (< 1200px) */
+@media screen and (max-width: 1200px) {
+  .view-mode-label {
+    display: none;
+  }
+  .repo-badge-public {
+    display: none;
+  }
+  .action-btn, .print-btn, .clear-btn, .restore-btn {
+    padding: 0 9px;
+  }
+}
+
 /* Tablets Landscape & Small Laptops (< 1024px) */
 @media screen and (max-width: 1024px) {
   .app-container {
@@ -3137,9 +3169,6 @@ body {
   .toolbar {
     flex-wrap: nowrap;
     white-space: nowrap;
-  }
-  .repo-badge-public {
-    display: none;
   }
   .status-item.status-time {
     display: none;
