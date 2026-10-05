@@ -81,9 +81,36 @@ const decoded = decodeBase64Utf8(encoded);
 assert.equal(decoded, testMarkdown, 'UTF-8 Base64 roundtrip should preserve emojis, math, and unicode');
 
 // ── 7. Token management fallback safety in non-browser env ───────────────────
-// In Node (where localStorage is not native or mocked), should not throw
+// Provide mock localStorage for Node testing
+const mockStore = new Map();
+globalThis.localStorage = {
+  getItem: (k) => mockStore.get(k) || null,
+  setItem: (k, v) => mockStore.set(k, String(v)),
+  removeItem: (k) => mockStore.delete(k),
+};
+
 clearGitHubToken();
 assert.equal(getGitHubToken(), null);
 saveGitHubToken('ghp_testToken12345');
+assert.equal(getGitHubToken(), 'ghp_testToken12345');
+
+// ── 8. createBranch & createPullRequest validation ───────────────────────────
+import { createBranch, createPullRequest } from './githubApi.js';
+
+// createBranch with missing branch name should reject with clean error
+await assert.rejects(
+  async () => {
+    await createBranch({ owner: 'user', repo: 'repo' });
+  },
+  { message: 'New branch name is required.' }
+);
+
+// createPullRequest with missing title should reject with clean error
+await assert.rejects(
+  async () => {
+    await createPullRequest({ owner: 'user', repo: 'repo', head: 'patch-1' });
+  },
+  { message: 'Pull Request title is required.' }
+);
 
 console.log('All githubApi tests passed successfully!');

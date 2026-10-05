@@ -121,8 +121,12 @@ export default function RepoFileTree({
     if (!isOpen || !owner || !repo) return;
 
     let isMounted = true;
-    setLoading(true);
-    setError('');
+    queueMicrotask(() => {
+      if (isMounted) {
+        setLoading(true);
+        setError('');
+      }
+    });
 
     getRepoTree({ owner, repo, branch })
       .then((res) => {

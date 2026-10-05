@@ -9,13 +9,16 @@ export default function TemplateModal({
   isOpen,
   onClose,
   onApplyTemplate,
+  onInsertTemplate,
+  onReplaceContent,
 }) {
   const [selectedId, setSelectedId] = useState(GITHUB_TEMPLATES[0].id);
   const [copied, setCopied] = useState(false);
 
   if (!isOpen) return null;
 
-  const selectedTemplate = GITHUB_TEMPLATES.find((t) => t.id === selectedId) || GITHUB_TEMPLATES[0];
+  const selectedTemplate =
+    GITHUB_TEMPLATES.find((t) => t.id === selectedId) || GITHUB_TEMPLATES[0];
 
   const handleCopy = async () => {
     try {
@@ -23,77 +26,101 @@ export default function TemplateModal({
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // fallback
+      // clipboard fallback
     }
   };
 
   const handleApply = (mode) => {
-    onApplyTemplate(selectedTemplate.content, mode, selectedTemplate.defaultFilename);
+    if (typeof onApplyTemplate === 'function') {
+      onApplyTemplate(selectedTemplate.content, mode, selectedTemplate.defaultFilename);
+    } else if (mode === 'insert' && typeof onInsertTemplate === 'function') {
+      onInsertTemplate(selectedTemplate.content, selectedTemplate.defaultFilename);
+    } else if (mode === 'replace' && typeof onReplaceContent === 'function') {
+      onReplaceContent(selectedTemplate.content, selectedTemplate.defaultFilename);
+    }
     onClose();
   };
 
+  // Group templates by category
+  const categories = ['Documentation', 'Issues & PRs', 'Community'];
+  const grouped = categories.map((cat) => ({
+    name: cat,
+    items: GITHUB_TEMPLATES.filter((t) => t.category === cat),
+  }));
+
   return (
-    <div className="modal-backdrop" onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="template-modal-title">
+    <div
+      className="modal-overlay template-modal-overlay"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="template-modal-title"
+    >
       <div className="template-modal-window" onClick={(e) => e.stopPropagation()}>
+        {/* Header */}
         <div className="template-modal-header">
-          <div className="template-modal-title-wrap">
-            <span className="template-modal-icon">📄</span>
-            <div>
-              <h2 id="template-modal-title" className="template-modal-title">GitHub Template Gallery</h2>
-              <p className="template-modal-subtitle">Insert standardized documentation, community standards, and issue templates.</p>
-            </div>
+          <div className="template-header-title">
+            <span style={{ fontSize: '18px' }} aria-hidden="true">📄</span>
+            <h3 id="template-modal-title">GitHub Template Gallery</h3>
+            <span className="template-header-badge">7 Templates</span>
           </div>
-          <button type="button" className="modal-close-btn" onClick={onClose} aria-label="Close modal">✕</button>
+          <button
+            type="button"
+            className="gh-modal-close-btn"
+            onClick={onClose}
+            aria-label="Close modal"
+          >
+            &times;
+          </button>
         </div>
 
-        <div className="template-modal-body">
-          {/* Left Sidebar: Template List */}
-          <div className="template-sidebar">
-            <div className="template-list" role="tablist">
-              {GITHUB_TEMPLATES.map((tmpl) => (
-                <button
-                  key={tmpl.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={selectedId === tmpl.id}
-                  className={`template-list-item ${selectedId === tmpl.id ? 'active' : ''}`}
-                  onClick={() => setSelectedId(tmpl.id)}
-                >
-                  <div className="template-item-top">
-                    <span className="template-item-name">{tmpl.name}</span>
-                    <span className="template-item-category">{tmpl.category}</span>
-                  </div>
-                  <span className="template-item-desc">{tmpl.description}</span>
-                </button>
-              ))}
-            </div>
+        {/* 2-Column Dialog Layout */}
+        <div className="template-dialog-layout">
+          {/* Left Sidebar: Categories & Templates */}
+          <div className="template-sidebar" role="tablist" aria-label="Available templates">
+            {grouped.map((group) => (
+              <div key={group.name} className="template-category-group">
+                <div className="template-group-title">{group.name}</div>
+                {group.items.map((tmpl) => (
+                  <button
+                    key={tmpl.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={selectedId === tmpl.id}
+                    className={`template-list-item ${selectedId === tmpl.id ? 'active' : ''}`}
+                    onClick={() => setSelectedId(tmpl.id)}
+                  >
+                    <div className="template-item-name">{tmpl.name}</div>
+                    <div className="template-item-file">{tmpl.defaultFilename}</div>
+                  </button>
+                ))}
+              </div>
+            ))}
           </div>
 
-          {/* Right Main Pane: Template Details & Code Preview */}
-          <div className="template-preview-pane">
-            <div className="template-preview-meta">
-              <div>
-                <h3 className="template-meta-name">{selectedTemplate.name}</h3>
-                <span className="template-meta-file">Default path: <code>{selectedTemplate.defaultFilename}</code></span>
+          {/* Right Main Pane: Template Preview & Actions */}
+          <div className="template-main-view">
+            <div className="template-view-header">
+              <div className="template-view-title">
+                <h4>{selectedTemplate.name}</h4>
+                <p className="template-view-desc">{selectedTemplate.description}</p>
               </div>
               <button
                 type="button"
-                className="template-action-btn template-copy-btn"
+                className="template-copy-btn"
                 onClick={handleCopy}
-                title="Copy markdown text to clipboard"
+                title="Copy markdown content to clipboard"
               >
                 {copied ? '✓ Copied' : 'Copy'}
               </button>
             </div>
 
-            <div className="template-code-box">
-              <pre className="template-code-pre">{selectedTemplate.content}</pre>
-            </div>
+            <pre className="template-preview-code-box">{selectedTemplate.content}</pre>
 
-            <div className="template-preview-actions">
+            <div className="template-view-actions">
               <button
                 type="button"
-                className="template-action-btn template-btn-insert"
+                className="template-insert-btn"
                 onClick={() => handleApply('insert')}
                 title="Insert template text at current cursor position"
               >
@@ -101,7 +128,7 @@ export default function TemplateModal({
               </button>
               <button
                 type="button"
-                className="template-action-btn template-btn-replace"
+                className="template-replace-btn"
                 onClick={() => handleApply('replace')}
                 title="Replace entire editor draft with this template"
               >

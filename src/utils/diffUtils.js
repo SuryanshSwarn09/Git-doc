@@ -112,7 +112,7 @@ export function computeLineDiff(originalText = '', newText = '') {
  * @returns {string}
  */
 export function formatUnifiedDiff(originalText = '', newText = '', filename = 'document.md') {
-  const { lines, additions, deletions, hasChanges } = computeLineDiff(originalText, newText);
+  const { lines, hasChanges } = computeLineDiff(originalText, newText);
 
   if (!hasChanges) {
     return `--- a/${filename}\n+++ b/${filename}\n(no changes)`;

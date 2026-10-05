@@ -109,7 +109,7 @@ export function parseGitHubUrl(url) {
   let trimmed = url.trim();
 
   // Strip wrapping quotes or brackets
-  trimmed = trimmed.replace(/^["'<(\[]+|["'>)\]]+$/g, '');
+  trimmed = trimmed.replace(/^["'<([+|["'>)\]]+$/g, '');
 
   // 1. Raw GitHub user content: raw.githubusercontent.com/owner/repo/branch/path
   const rawMatch = trimmed.match(
@@ -474,14 +474,28 @@ export async function getRepoDetails({ owner, repo }) {
 
 // ─── API: Create Git Branch ───────────────────────────────────────────────────
 
-export async function createBranch({ owner, repo, branch, fromBranch = 'main' }) {
+export async function createBranch({
+  owner,
+  repo,
+  branch,
+  newBranch,
+  fromBranch,
+  baseBranch = 'main',
+}) {
   const token = getGitHubToken();
   if (!token) throw new Error('A GitHub token is required to create branches. Add one in the Connect tab.');
 
+  const targetBranch = (branch || newBranch || '').trim();
+  const sourceBranch = (fromBranch || baseBranch || 'main').trim();
+
+  if (!targetBranch) {
+    throw new Error('New branch name is required.');
+  }
+
   const cleanOwner = normalizeOwner(owner);
   const cleanRepo = normalizeRepo(repo);
-  const cleanBranch = branch.trim().replace(/^refs\/heads\//, '').replace(/\s+/g, '-');
-  const cleanFrom = fromBranch.trim().replace(/^refs\/heads\//, '');
+  const cleanBranch = targetBranch.replace(/^refs\/heads\//, '').replace(/\s+/g, '-');
+  const cleanFrom = sourceBranch.replace(/^refs\/heads\//, '');
 
   // 1. Get SHA of the base branch
   const refRes = await fetch(`${GITHUB_API_BASE}/repos/${cleanOwner}/${cleanRepo}/git/ref/heads/${cleanFrom}`, {
