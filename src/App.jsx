@@ -38,17 +38,21 @@ import {
   ChevronDownIcon,
   InfoIcon,
   ZenModeIcon,
-  ZenExitIcon
+  ZenExitIcon,
+  TemplateIcon,
+  FileTreeIcon
 } from './components/Icons.jsx';
 import PrintModal from './components/PrintModal.jsx';
 import GitHubModal from './components/GitHubModal.jsx';
+import TemplateModal from './components/TemplateModal.jsx';
+import RepoFileTree from './components/RepoFileTree.jsx';
 import { 
   getStoredPrintOptions, 
   saveStoredPrintOptions, 
   generatePrintCSS, 
   PRINT_PRESETS 
 } from './utils/printOptions.js';
-import { getGitHubToken, verifyGitHubToken } from './utils/githubApi.js';
+import { getGitHubToken, verifyGitHubToken, fetchRepoFile } from './utils/githubApi.js';
 import { 
   slugifyHeading, 
   generateTOCMarkdown, 
@@ -181,6 +185,28 @@ function App() {
   const [saveStatus, setSaveStatus] = useState('Saved');
   const [theme, setTheme] = useState(getInitialTheme);
   const [copiedHTML, setCopiedHTML] = useState(false);
+
+  // Original unmodified document content for Pre-Commit/PR Diffing
+  const [originalContent, setOriginalContent] = useState(() => {
+    try {
+      const saved = localStorage.getItem(DRAFT_STORAGE_KEY);
+      return saved !== null ? saved : EXAMPLE_MD;
+    } catch {
+      return EXAMPLE_MD;
+    }
+  });
+
+  // Template gallery modal state
+  const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
+
+  // Repository Explorer sidebar state
+  const [isExplorerOpen, setIsExplorerOpen] = useState(false);
+  const [repoExplorerMeta, setRepoExplorerMeta] = useState({
+    owner: 'SuryanshSwarn09',
+    repo: 'Git-doc',
+    branch: 'main',
+    path: 'README.md',
+  });
   
   // State to track which modal is currently open ('privacy', 'terms', 'clear', 'print', or null)
   const [activeModal, setActiveModal] = useState(null);
@@ -256,6 +282,8 @@ function App() {
       if (e.key === 'Escape') {
         if (isExportMenuOpen) {
           setIsExportMenuOpen(false);
+        } else if (isTemplateModalOpen) {
+          setIsTemplateModalOpen(false);
         } else if (activeModal) {
           setActiveModal(null);
         }
@@ -263,7 +291,7 @@ function App() {
     };
     window.addEventListener('keydown', handleEscape);
     return () => window.removeEventListener('keydown', handleEscape);
-  }, [activeModal, isExportMenuOpen]);
+  }, [activeModal, isExportMenuOpen, isTemplateModalOpen]);
 
   // Handle click outside to close the export menu
   useEffect(() => {
@@ -280,9 +308,15 @@ function App() {
     };
   }, [isExportMenuOpen]);
 
-  // Handle keyboard shortcuts for switching view modes (Ctrl/Cmd + Alt + 1/2/3)
+  // Handle keyboard shortcuts (Alt+B for repository explorer, Ctrl/Cmd + Alt + 1/2/3 for views)
   useEffect(() => {
-    const handleViewModeShortcuts = (e) => {
+    const handleGlobalShortcuts = (e) => {
+      if (e.altKey && (e.key === 'b' || e.key === 'B')) {
+        e.preventDefault();
+        setIsExplorerOpen((prev) => !prev);
+        return;
+      }
+
       const modifier = e.ctrlKey || e.metaKey;
       if (modifier && e.altKey) {
         if (e.key === '1') {
@@ -297,8 +331,8 @@ function App() {
         }
       }
     };
-    window.addEventListener('keydown', handleViewModeShortcuts);
-    return () => window.removeEventListener('keydown', handleViewModeShortcuts);
+    window.addEventListener('keydown', handleGlobalShortcuts);
+    return () => window.removeEventListener('keydown', handleGlobalShortcuts);
   }, []);
 
   // Auto-save draft to localStorage whenever markdown changes (debounced)
@@ -617,6 +651,54 @@ function App() {
     }
   };
 
+  const handleInsertTemplate = (templateContent) => {
+    const textarea = editorRef.current;
+    if (textarea) {
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const newText = markdown.substring(0, start) + templateContent + markdown.substring(end);
+      setMarkdown(newText);
+      setSaveStatus('Saving…');
+      setTimeout(() => {
+        textarea.focus();
+        textarea.setSelectionRange(start + templateContent.length, start + templateContent.length);
+      }, 50);
+    } else {
+      setMarkdown((prev) => (prev ? `${prev}\n\n${templateContent}` : templateContent));
+    }
+  };
+
+  const handleReplaceWithTemplate = (templateContent) => {
+    setMarkdown(templateContent);
+    setOriginalContent(templateContent);
+    setSaveStatus('Saved');
+    if (editorRef.current) {
+      editorRef.current.focus();
+    }
+  };
+
+  const handleSelectRepoFile = async (file) => {
+    try {
+      setSaveStatus('Fetching…');
+      const result = await fetchRepoFile({
+        owner: repoExplorerMeta.owner,
+        repo: repoExplorerMeta.repo,
+        path: file.path,
+        ref: repoExplorerMeta.branch || 'main',
+      });
+      setMarkdown(result.content);
+      setOriginalContent(result.content);
+      setRepoExplorerMeta((prev) => ({
+        ...prev,
+        path: file.path,
+      }));
+      setSaveStatus('Saved');
+    } catch (err) {
+      alert(`Could not load ${file.path}: ${err.message}`);
+      setSaveStatus('Error');
+    }
+  };
+
   const stats = useMemo(() => getDocumentStats(markdown), [markdown]);
 
   return (
@@ -637,60 +719,72 @@ function App() {
       <header className="top-bar" role="banner">
         <div className="top-bar-left">
           <div className="repo-header-brand">
-          <a
-            href="https://github.com/SuryanshSwarn09/Git-doc"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="repo-breadcrumb"
-            title="Open SuryanshSwarn09/Git-doc on GitHub"
-          >
-            <GitHubIcon size={18} className="repo-octocat-icon" />
-            <span className="repo-owner">SuryanshSwarn09</span>
-            <span className="repo-slash">/</span>
-            <span className="repo-name">Git-doc</span>
-          </a>
-          <span className="repo-badge-public">Public</span>
-        </div>
+            <a
+              href={`https://github.com/${repoExplorerMeta.owner}/${repoExplorerMeta.repo}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="repo-breadcrumb"
+              title={`Open ${repoExplorerMeta.owner}/${repoExplorerMeta.repo} on GitHub`}
+            >
+              <GitHubIcon size={18} className="repo-octocat-icon" />
+              <span className="repo-owner">{repoExplorerMeta.owner}</span>
+              <span className="repo-slash">/</span>
+              <span className="repo-name">{repoExplorerMeta.repo}</span>
+            </a>
+            <span className="repo-badge-public">Public</span>
+          </div>
 
-        <div className="view-mode-selector" role="radiogroup" aria-label="View Mode">
           <button
             type="button"
-            role="radio"
-            aria-checked={viewMode === 'editor'}
-            className={`view-mode-btn ${viewMode === 'editor' ? 'active' : ''}`}
-            onClick={() => setViewMode('editor')}
-            title="Write Mode (Ctrl+Alt+1) — Editor only"
-            aria-label="Write Mode (Editor only)"
+            className={`repo-explorer-toggle-btn ${isExplorerOpen ? 'active' : ''}`}
+            onClick={() => setIsExplorerOpen((prev) => !prev)}
+            title="Browse Repository Files (Alt+B)"
+            aria-label="Toggle Repository File Explorer"
+            aria-pressed={isExplorerOpen}
           >
-            <EditViewIcon size={14} />
-            <span className="view-mode-label">Write</span>
+            <FileTreeIcon size={14} />
+            <span>Files</span>
           </button>
-          <button
-            type="button"
-            role="radio"
-            aria-checked={viewMode === 'split'}
-            className={`view-mode-btn ${viewMode === 'split' ? 'active' : ''}`}
-            onClick={() => setViewMode('split')}
-            title="Split Mode (Ctrl+Alt+2) — Side by side"
-            aria-label="Split Mode (Side by side)"
-          >
-            <SplitViewIcon size={14} />
-            <span className="view-mode-label">Split</span>
-          </button>
-          <button
-            type="button"
-            role="radio"
-            aria-checked={viewMode === 'preview'}
-            className={`view-mode-btn ${viewMode === 'preview' ? 'active' : ''}`}
-            onClick={() => setViewMode('preview')}
-            title="Preview Mode (Ctrl+Alt+3) — Read only"
-            aria-label="Preview Mode (Read only)"
-          >
-            <PreviewViewIcon size={14} />
-            <span className="view-mode-label">Read</span>
-          </button>
+
+          <div className="view-mode-selector" role="radiogroup" aria-label="View Mode">
+            <button
+              type="button"
+              role="radio"
+              aria-checked={viewMode === 'editor'}
+              className={`view-mode-btn ${viewMode === 'editor' ? 'active' : ''}`}
+              onClick={() => setViewMode('editor')}
+              title="Write Mode (Ctrl+Alt+1) — Editor only"
+              aria-label="Write Mode (Editor only)"
+            >
+              <EditViewIcon size={14} />
+              <span className="view-mode-label">Write</span>
+            </button>
+            <button
+              type="button"
+              role="radio"
+              aria-checked={viewMode === 'split'}
+              className={`view-mode-btn ${viewMode === 'split' ? 'active' : ''}`}
+              onClick={() => setViewMode('split')}
+              title="Split Mode (Ctrl+Alt+2) — Side by side"
+              aria-label="Split Mode (Side by side)"
+            >
+              <SplitViewIcon size={14} />
+              <span className="view-mode-label">Split</span>
+            </button>
+            <button
+              type="button"
+              role="radio"
+              aria-checked={viewMode === 'preview'}
+              className={`view-mode-btn ${viewMode === 'preview' ? 'active' : ''}`}
+              onClick={() => setViewMode('preview')}
+              title="Preview Mode (Ctrl+Alt+3) — Read only"
+              aria-label="Preview Mode (Read only)"
+            >
+              <PreviewViewIcon size={14} />
+              <span className="view-mode-label">Read</span>
+            </button>
+          </div>
         </div>
-      </div>
 
       <div className="top-bar-center">
         <div className="toolbar" role="toolbar" aria-label="Markdown formatting toolbar">
@@ -735,6 +829,14 @@ function App() {
               aria-label="Generate Table of Contents"
             >
               <TocIcon size={15} />
+            </button>
+            <button 
+              className="format-btn template-btn" 
+              onClick={() => setIsTemplateModalOpen(true)} 
+              title="GitHub Issue, PR & Readme Templates" 
+              aria-label="GitHub Templates Gallery"
+            >
+              <TemplateIcon size={15} />
             </button>
           </div>
           <div className="divider"></div>
@@ -848,12 +950,23 @@ function App() {
           <button
             className={`github-btn ${githubUser ? 'github-btn-connected' : ''}`}
             onClick={() => setActiveModal('github')}
-            title={githubUser ? `GitHub — connected as @${githubUser.login}` : 'GitHub Integration — Import, Gist, Commit'}
+            title={githubUser ? `GitHub — connected as @${githubUser.login}` : 'GitHub Integration — Import, Gist, Commit, PR'}
             aria-label="GitHub Integration"
           >
             <GitHubIcon size={15} />
             <span className="btn-label-full">{githubUser ? `@${githubUser.login}` : 'GitHub'}</span>
             <span className="btn-label-short">GH</span>
+          </button>
+          <button
+            type="button"
+            className="action-btn template-action-btn"
+            onClick={() => setIsTemplateModalOpen(true)}
+            title="GitHub Issue, PR & Readme Templates"
+            aria-label="GitHub Templates Gallery"
+          >
+            <TemplateIcon size={15} />
+            <span className="btn-label-full">Templates</span>
+            <span className="btn-label-short">Tpl</span>
           </button>
           <button
             type="button"
@@ -882,7 +995,18 @@ function App() {
       </div>
     </header>
 
-      <div className={`split-layout layout-mode-${viewMode}`}>
+      <div className="main-workbench">
+        <RepoFileTree
+          isOpen={isExplorerOpen}
+          onClose={() => setIsExplorerOpen(false)}
+          owner={repoExplorerMeta.owner}
+          repo={repoExplorerMeta.repo}
+          branch={repoExplorerMeta.branch}
+          currentPath={repoExplorerMeta.path}
+          onSelectFile={handleSelectRepoFile}
+        />
+
+        <div className={`split-layout layout-mode-${viewMode}`}>
         <div className={`pane editor-pane ${viewMode === 'preview' ? 'layout-pane-hidden' : ''} ${viewMode === 'editor' ? 'layout-pane-focused' : ''}`}>
           <div className="pane-header">
             <span className="pane-title">Markdown</span>
@@ -935,6 +1059,7 @@ function App() {
             </div>
           )}
         </div>
+      </div>
       </div>
 
       {/* App Bottom Status Bar */}
@@ -1079,12 +1204,31 @@ function App() {
         isOpen={activeModal === 'github'}
         onClose={() => setActiveModal(null)}
         markdown={markdown}
-        onImport={(content) => {
+        originalContent={originalContent}
+        onImport={(content, meta) => {
           setMarkdown(content);
+          setOriginalContent(content);
+          if (meta) {
+            setRepoExplorerMeta({
+              owner: meta.owner,
+              repo: meta.repo,
+              branch: meta.branch || 'main',
+              path: meta.path || 'README.md',
+            });
+            setIsExplorerOpen(true);
+          }
           setActiveModal(null);
         }}
         githubUser={githubUser}
         onUserChange={setGithubUser}
+      />
+
+      {/* GitHub Issue, PR & Readme Template Gallery Modal */}
+      <TemplateModal
+        isOpen={isTemplateModalOpen}
+        onClose={() => setIsTemplateModalOpen(false)}
+        onInsertTemplate={handleInsertTemplate}
+        onReplaceContent={handleReplaceWithTemplate}
       />
       
     </div>
