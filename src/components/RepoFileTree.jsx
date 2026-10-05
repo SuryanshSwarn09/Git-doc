@@ -1,5 +1,14 @@
 import { useState, useEffect, useMemo } from 'react';
 import { getRepoTree } from '../utils/githubApi.js';
+import {
+  FileTreeIcon,
+  GitBranchIcon,
+  SearchIcon,
+  FolderIcon,
+  FolderOpenIcon,
+  MarkdownFileIcon,
+  XCloseIcon,
+} from './Icons.jsx';
 
 /**
  * Helper to build a nested hierarchy from a flat list of paths.
@@ -52,7 +61,9 @@ function TreeNode({ node, currentPath, onSelectFile, expandedDirs, onToggleDir }
         onClick={() => onSelectFile(node.path)}
         title={node.path}
       >
-        <span className="tree-file-icon">📄</span>
+        <span className="tree-file-icon">
+          <MarkdownFileIcon size={14} />
+        </span>
         <span className="tree-file-name">{node.name}</span>
       </button>
     );
@@ -76,8 +87,10 @@ function TreeNode({ node, currentPath, onSelectFile, expandedDirs, onToggleDir }
           className="tree-dir-item"
           onClick={() => onToggleDir(node.path)}
         >
-          <span className="tree-chevron">{isExpanded ? '▾' : '▸'}</span>
-          <span className="tree-dir-icon">📁</span>
+          <span className={`tree-chevron ${isExpanded ? 'expanded' : ''}`}>›</span>
+          <span className="tree-dir-icon">
+            {isExpanded ? <FolderOpenIcon size={14} /> : <FolderIcon size={14} />}
+          </span>
           <span className="tree-dir-name">{node.name}</span>
         </button>
       )}
@@ -108,9 +121,11 @@ export default function RepoFileTree({
   owner,
   repo,
   branch = 'main',
+  currentPath = '',
   currentFilePath = '',
   onSelectFile,
 }) {
+  const activeSelectedPath = currentPath || currentFilePath || '';
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -178,31 +193,41 @@ export default function RepoFileTree({
     <aside className="repo-explorer-sidebar" aria-label="Repository files explorer">
       <div className="repo-explorer-header">
         <div className="repo-explorer-title-box">
-          <span className="repo-explorer-icon">📦</span>
+          <FileTreeIcon size={16} className="repo-explorer-icon" />
           <div className="repo-explorer-names">
-            <span className="repo-explorer-repo-name">{owner}/{repo}</span>
-            <span className="repo-explorer-branch-badge">branch: {branch}</span>
+            <span className="repo-explorer-repo-name" title={`${owner}/${repo}`}>
+              {owner}/{repo}
+            </span>
+            <div className="repo-explorer-branch-badge">
+              <span className="repo-explorer-branch-pill" title={`Branch: ${branch}`}>
+                <GitBranchIcon size={11} />
+                <span>{branch}</span>
+              </span>
+            </div>
           </div>
         </div>
         <button
           type="button"
           className="repo-explorer-close-btn"
           onClick={onClose}
-          title="Close File Explorer (Ctrl+B)"
+          title="Close File Explorer (Alt+B)"
           aria-label="Close File Explorer"
         >
-          ✕
+          <XCloseIcon size={13} />
         </button>
       </div>
 
       <div className="repo-explorer-search-box">
-        <input
-          type="search"
-          className="repo-explorer-search-input"
-          placeholder="Filter markdown files..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
+        <div className="repo-explorer-search-wrapper">
+          <SearchIcon size={13} className="repo-explorer-search-icon" />
+          <input
+            type="search"
+            className="repo-explorer-search-input"
+            placeholder="Filter markdown files..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
       </div>
 
       <div className="repo-explorer-content">
@@ -229,7 +254,7 @@ export default function RepoFileTree({
           <div className="repo-explorer-tree">
             <TreeNode
               node={treeData}
-              currentPath={currentFilePath}
+              currentPath={activeSelectedPath}
               onSelectFile={onSelectFile}
               expandedDirs={expandedDirs}
               onToggleDir={handleToggleDir}
