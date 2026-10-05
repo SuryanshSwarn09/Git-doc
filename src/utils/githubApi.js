@@ -445,3 +445,160 @@ export async function commitFileToRepo({ owner, repo, path, content, message, br
     htmlUrl: data.content?.html_url || data.commit?.html_url || '',
   };
 }
+
+// ─── API: Repository Metadata & Default Branch ────────────────────────────────
+
+export async function getRepoDetails({ owner, repo }) {
+  const cleanOwner = normalizeOwner(owner);
+  const cleanRepo = normalizeRepo(repo);
+  const token = getGitHubToken();
+
+  const response = await fetch(`${GITHUB_API_BASE}/repos/${cleanOwner}/${cleanRepo}`, {
+    headers: buildHeaders(token),
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.message || `Failed to fetch repo details: ${response.status}`);
+  }
+
+  const data = await response.json();
+  return {
+    defaultBranch: data.default_branch || 'main',
+    isPrivate: data.private,
+    description: data.description || '',
+    stars: data.stargazers_count || 0,
+    openIssues: data.open_issues_count || 0,
+  };
+}
+
+// ─── API: Create Git Branch ───────────────────────────────────────────────────
+
+export async function createBranch({ owner, repo, branch, fromBranch = 'main' }) {
+  const token = getGitHubToken();
+  if (!token) throw new Error('A GitHub token is required to create branches. Add one in the Connect tab.');
+
+  const cleanOwner = normalizeOwner(owner);
+  const cleanRepo = normalizeRepo(repo);
+  const cleanBranch = branch.trim().replace(/^refs\/heads\//, '').replace(/\s+/g, '-');
+  const cleanFrom = fromBranch.trim().replace(/^refs\/heads\//, '');
+
+  // 1. Get SHA of the base branch
+  const refRes = await fetch(`${GITHUB_API_BASE}/repos/${cleanOwner}/${cleanRepo}/git/ref/heads/${cleanFrom}`, {
+    headers: buildHeaders(token),
+  });
+
+  if (!refRes.ok) {
+    throw new Error(`Base branch "${cleanFrom}" not found in ${cleanOwner}/${cleanRepo}.`);
+  }
+
+  const refData = await refRes.json();
+  const baseSha = refData.object?.sha;
+  if (!baseSha) {
+    throw new Error(`Could not resolve commit SHA for branch "${cleanFrom}".`);
+  }
+
+  // 2. Create the new ref
+  const createRes = await fetch(`${GITHUB_API_BASE}/repos/${cleanOwner}/${cleanRepo}/git/refs`, {
+    method: 'POST',
+    headers: { ...buildHeaders(token), 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      ref: `refs/heads/${cleanBranch}`,
+      sha: baseSha,
+    }),
+  });
+
+  if (createRes.status === 422) {
+    // Branch already exists, which is acceptable
+    return { branch: cleanBranch, sha: baseSha, alreadyExisted: true };
+  }
+
+  if (!createRes.ok) {
+    const err = await createRes.json().catch(() => ({}));
+    throw new Error(err.message || `Failed to create branch "${cleanBranch}": ${createRes.status}`);
+  }
+
+  return { branch: cleanBranch, sha: baseSha, alreadyExisted: false };
+}
+
+// ─── API: Create Pull Request ─────────────────────────────────────────────────
+
+export async function createPullRequest({ owner, repo, title, body = '', head, base = 'main' }) {
+  const token = getGitHubToken();
+  if (!token) throw new Error('A GitHub token is required to create Pull Requests. Add one in the Connect tab.');
+
+  const cleanOwner = normalizeOwner(owner);
+  const cleanRepo = normalizeRepo(repo);
+
+  if (!title || !title.trim()) {
+    throw new Error('Pull Request title is required.');
+  }
+  if (!head || !head.trim()) {
+    throw new Error('Head branch name is required.');
+  }
+
+  const response = await fetch(`${GITHUB_API_BASE}/repos/${cleanOwner}/${cleanRepo}/pulls`, {
+    method: 'POST',
+    headers: { ...buildHeaders(token), 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      title: title.trim(),
+      body: body.trim(),
+      head: head.trim(),
+      base: base.trim(),
+    }),
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.message || `GitHub Pull Request error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  return {
+    id: data.id,
+    number: data.number,
+    htmlUrl: data.html_url,
+    title: data.title,
+    state: data.state,
+  };
+}
+
+// ─── API: Get Repository Git Tree (Files Explorer) ────────────────────────────
+
+export async function getRepoTree({ owner, repo, branch = 'main' }) {
+  const cleanOwner = normalizeOwner(owner);
+  const cleanRepo = normalizeRepo(repo);
+  const token = getGitHubToken();
+
+  const response = await fetch(
+    `${GITHUB_API_BASE}/repos/${cleanOwner}/${cleanRepo}/git/trees/${encodeURIComponent(branch)}?recursive=1`,
+    { headers: buildHeaders(token) }
+  );
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.message || `Failed to fetch repo file tree: ${response.status}`);
+  }
+
+  const data = await response.json();
+  const tree = data.tree || [];
+
+  // Filter for text & markdown documentation files
+  const docExtensions = ['.md', '.markdown', '.mdx', '.txt'];
+  const docFiles = tree.filter((item) => {
+    if (item.type !== 'blob') return false;
+    const lower = item.path.toLowerCase();
+    return docExtensions.some((ext) => lower.endsWith(ext)) || lower.endsWith('license') || lower.endsWith('notice');
+  });
+
+  return {
+    sha: data.sha,
+    truncated: data.truncated || false,
+    files: docFiles.map((f) => ({
+      path: f.path,
+      size: f.size || 0,
+      sha: f.sha,
+    })),
+  };
+}
+

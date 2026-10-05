@@ -1,5 +1,12 @@
 import { useState, useEffect } from 'react';
-import { GitHubIcon, CheckIcon, CheckCircleIcon } from './Icons.jsx';
+import {
+  GitHubIcon,
+  CheckIcon,
+  CheckCircleIcon,
+  GitPullRequestIcon,
+  GitBranchIcon,
+  DiffIcon,
+} from './Icons.jsx';
 import {
   saveGitHubToken,
   clearGitHubToken,
@@ -11,20 +18,25 @@ import {
   commitFileToRepo,
   normalizeOwner,
   normalizeRepo,
+  createBranch,
+  createPullRequest,
 } from '../utils/githubApi.js';
 import { extractDocTitle, slugifyTitle } from '../utils/exportUtils.js';
+import DiffViewer from './DiffViewer.jsx';
 
 /**
- * GitHubModal — 4-tab modal for GitHub integration:
- *  Tab 1: Connect  — PAT setup & user verification
- *  Tab 2: Import   — Fetch Markdown from any GitHub URL
- *  Tab 3: Gist     — Save draft as a GitHub Gist
- *  Tab 4: Commit   — Push Markdown file to a repository
+ * GitHubModal — 5-tab modal for GitHub integration:
+ *  Tab 1: Connect      — PAT setup & user verification
+ *  Tab 2: Import       — Fetch Markdown from any GitHub URL
+ *  Tab 3: Gist         — Save draft as a GitHub Gist
+ *  Tab 4: Commit       — Push Markdown file to a repository
+ *  Tab 5: Pull Request — Branch creation & Pull Request workflow
  */
 export default function GitHubModal({
   isOpen,
   onClose,
   markdown,
+  originalContent = '',
   onImport,
   githubUser,
   onUserChange,
@@ -60,6 +72,22 @@ export default function GitHubModal({
   const [commitError, setCommitError] = useState('');
   const [commitResult, setCommitResult] = useState(null); // { htmlUrl, commitSha }
 
+  // ── Tab 5: Pull Request ─────────────────────────────────────────────
+  const [prOwner, setPrOwner] = useState('');
+  const [prRepo, setPrRepo] = useState('');
+  const [prPath, setPrPath] = useState('');
+  const [prBaseBranch, setPrBaseBranch] = useState('main');
+  const [prHeadBranch, setPrHeadBranch] = useState('');
+  const [prTitle, setPrTitle] = useState('');
+  const [prBody, setPrBody] = useState('');
+  const [prLoading, setPrLoading] = useState(false);
+  const [prError, setPrError] = useState('');
+  const [prResult, setPrResult] = useState(null); // { prNumber, htmlUrl }
+
+  // ── Diff Review Toggles ─────────────────────────────────────────────
+  const [showCommitDiff, setShowCommitDiff] = useState(false);
+  const [showPrDiff, setShowPrDiff] = useState(false);
+
   // Pre-fill filenames and owner from current state whenever modal opens
   useEffect(() => {
     if (isOpen && markdown) {
@@ -68,18 +96,31 @@ export default function GitHubModal({
       setGistFilename(`${slug}.md`);
       setCommitPath((prev) => prev || `${slug}.md`);
       setCommitMessage((prev) => prev || `docs: update ${slug}.md`);
+      setPrPath((prev) => prev || `${slug}.md`);
+      setPrTitle((prev) => prev || `docs: update ${slug}.md`);
+      setPrHeadBranch((prev) => prev || `patch-${Math.floor(1000 + Math.random() * 9000)}`);
+      setPrBody(
+        (prev) =>
+          prev ||
+          `### Proposed Documentation Changes\n\n- Updated \`${slug}.md\` documentation.\n\n*Created with Git-doc*`
+      );
     }
     if (isOpen && githubUser?.login) {
       setCommitOwner((prev) => prev || githubUser.login);
+      setPrOwner((prev) => prev || githubUser.login);
     }
     if (isOpen) {
       setImportPreview(null);
       setGistResult(null);
       setCommitResult(null);
+      setPrResult(null);
       setImportError('');
       setGistError('');
       setCommitError('');
+      setPrError('');
       setConnectError('');
+      setShowCommitDiff(false);
+      setShowPrDiff(false);
     }
   }, [isOpen, markdown, githubUser]);
 
@@ -150,15 +191,27 @@ export default function GitHubModal({
 
   const handleImportConfirm = () => {
     if (importPreview) {
-      onImport(importPreview.content);
       const parsed = parseGitHubUrl(importUrl.trim());
+      const meta = parsed
+        ? {
+            owner: parsed.owner,
+            repo: parsed.repo,
+            path: parsed.path,
+            branch: parsed.ref || 'main',
+          }
+        : null;
       if (parsed) {
         setCommitOwner(parsed.owner);
         setCommitRepo(parsed.repo);
         setCommitPath(parsed.path);
         if (parsed.ref) setCommitBranch(parsed.ref);
         setCommitMessage(`docs: update ${parsed.path}`);
+        setPrOwner(parsed.owner);
+        setPrRepo(parsed.repo);
+        setPrPath(parsed.path);
+        if (parsed.ref) setPrBaseBranch(parsed.ref);
       }
+      onImport(importPreview.content, meta);
       setImportPreview(null);
       setImportUrl('');
       onClose();
@@ -258,12 +311,127 @@ export default function GitHubModal({
     }
   };
 
+  const handleCreatePR = async () => {
+    let owner = prOwner.trim();
+    let repo = prRepo.trim();
+
+    if (owner.includes('/') || owner.startsWith('http')) {
+      const parsed = parseGitHubUrl(owner);
+      if (parsed) {
+        owner = parsed.owner;
+        if (!repo) repo = parsed.repo;
+      } else {
+        const parts = owner.split('/');
+        owner = parts[0];
+        if (!repo && parts[1]) repo = parts[1];
+      }
+    }
+    if (repo.includes('/') || repo.startsWith('http')) {
+      const parsed = parseGitHubUrl(repo);
+      if (parsed) {
+        if (!owner) owner = parsed.owner;
+        repo = parsed.repo;
+      } else {
+        const parts = repo.split('/');
+        if (!owner && parts[0]) owner = parts[0];
+        if (parts[1]) repo = parts[1];
+      }
+    }
+
+    owner = normalizeOwner(owner);
+    repo = normalizeRepo(repo);
+
+    if (!owner || !repo) {
+      setPrError('Owner and repository name are required.');
+      return;
+    }
+    if (!prPath.trim()) {
+      setPrError('File path is required (e.g. README.md or docs/guide.md).');
+      return;
+    }
+    if (!prHeadBranch.trim()) {
+      setPrError('New branch name is required.');
+      return;
+    }
+    if (!prTitle.trim()) {
+      setPrError('Pull request title is required.');
+      return;
+    }
+    if (!markdown.trim()) {
+      setPrError('Editor is empty — nothing to submit.');
+      return;
+    }
+
+    setPrLoading(true);
+    setPrError('');
+    setPrResult(null);
+
+    try {
+      const base = prBaseBranch.trim() || 'main';
+      const head = prHeadBranch.trim();
+
+      // Step 1: Create the branch from base
+      await createBranch({
+        owner,
+        repo,
+        newBranch: head,
+        baseBranch: base,
+      });
+
+      // Step 2: Determine SHA if file exists in the branch
+      let sha = undefined;
+      try {
+        sha = await getFileSha({
+          owner,
+          repo,
+          path: prPath.trim(),
+          branch: head,
+        });
+      } catch {
+        // file doesn't exist yet, proceed with undefined sha
+      }
+
+      // Step 3: Commit the markdown changes to the new branch
+      await commitFileToRepo({
+        owner,
+        repo,
+        path: prPath.trim(),
+        content: markdown,
+        message: prTitle.trim(),
+        branch: head,
+        sha: sha || undefined,
+      });
+
+      // Step 4: Create the pull request
+      const pr = await createPullRequest({
+        owner,
+        repo,
+        title: prTitle.trim(),
+        head,
+        base,
+        body:
+          prBody.trim() ||
+          `### Proposed Changes\n\n- Updated \`${prPath.trim()}\` via Git-doc.\n\n*Created with Git-doc*`,
+      });
+
+      setPrResult({
+        prNumber: pr.number,
+        htmlUrl: pr.html_url,
+      });
+    } catch (err) {
+      setPrError(err.message);
+    } finally {
+      setPrLoading(false);
+    }
+  };
+
   // ── Tab definitions ─────────────────────────────────────────────────
   const tabs = [
-    { id: 'connect', label: 'Connect',  emoji: '🔑' },
-    { id: 'import',  label: 'Import',   emoji: '📥' },
-    { id: 'gist',    label: 'Gist',     emoji: '☁️' },
-    { id: 'commit',  label: 'Commit',   emoji: '📤' },
+    { id: 'connect', label: 'Connect',      emoji: '🔑' },
+    { id: 'import',  label: 'Import',       emoji: '📥' },
+    { id: 'gist',    label: 'Gist',         emoji: '☁️' },
+    { id: 'commit',  label: 'Commit',       emoji: '📤' },
+    { id: 'pr',      label: 'Pull Request', emoji: '🔀' },
   ];
 
   return (
@@ -596,6 +764,25 @@ export default function GitHubModal({
               onChange={(e) => setCommitMessage(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleCommit()}
             />
+            <div className="gh-diff-toggle-row">
+              <button
+                type="button"
+                className="gh-diff-toggle-btn"
+                onClick={() => setShowCommitDiff((v) => !v)}
+              >
+                <DiffIcon size={14} />
+                <span>{showCommitDiff ? 'Hide Diff Review' : 'Review Changes before Committing'}</span>
+              </button>
+            </div>
+            {showCommitDiff && (
+              <div className="gh-modal-diff-wrapper">
+                <DiffViewer
+                  original={originalContent || ''}
+                  modified={markdown}
+                  filename={commitPath || 'document.md'}
+                />
+              </div>
+            )}
             {commitError && <p className="gh-error-msg">{commitError}</p>}
             {commitResult && (
               <div className="gh-success-card">
@@ -626,6 +813,162 @@ export default function GitHubModal({
                 onClick={onClose}
               >
                 {commitResult ? 'Done' : 'Cancel'}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ── Tab 5: Pull Request ────────────────────────────────────── */}
+        {activeTab === 'pr' && (
+          <div className="gh-tab-panel">
+            {!githubUser && (
+              <div className="gh-warning-box">
+                ⚠️ Connect your GitHub account first to open Pull Requests.
+                <button className="gh-inline-link" onClick={() => setActiveTab('connect')}>
+                  Go to Connect →
+                </button>
+              </div>
+            )}
+            <div className="gh-input-row">
+              <div className="gh-field">
+                <label className="gh-label" htmlFor="gh-pr-owner">Owner</label>
+                <input
+                  id="gh-pr-owner"
+                  type="text"
+                  className="gh-input"
+                  placeholder="e.g. SuryanshSwarn09"
+                  value={prOwner}
+                  onChange={(e) => setPrOwner(e.target.value)}
+                  spellCheck={false}
+                />
+              </div>
+              <div className="gh-field">
+                <label className="gh-label" htmlFor="gh-pr-repo">Repository</label>
+                <input
+                  id="gh-pr-repo"
+                  type="text"
+                  className="gh-input"
+                  placeholder="e.g. Git-doc"
+                  value={prRepo}
+                  onChange={(e) => setPrRepo(e.target.value)}
+                  spellCheck={false}
+                />
+              </div>
+            </div>
+
+            <label className="gh-label" htmlFor="gh-pr-path">Target File Path</label>
+            <input
+              id="gh-pr-path"
+              type="text"
+              className="gh-input"
+              placeholder="e.g. README.md or docs/guide.md"
+              value={prPath}
+              onChange={(e) => setPrPath(e.target.value)}
+              spellCheck={false}
+            />
+
+            <div className="gh-input-row">
+              <div className="gh-field">
+                <label className="gh-label" htmlFor="gh-pr-base">Base Branch</label>
+                <input
+                  id="gh-pr-base"
+                  type="text"
+                  className="gh-input"
+                  placeholder="main"
+                  value={prBaseBranch}
+                  onChange={(e) => setPrBaseBranch(e.target.value)}
+                  spellCheck={false}
+                />
+              </div>
+              <div className="gh-field">
+                <label className="gh-label" htmlFor="gh-pr-head">New Branch Name</label>
+                <input
+                  id="gh-pr-head"
+                  type="text"
+                  className="gh-input"
+                  placeholder="patch-1"
+                  value={prHeadBranch}
+                  onChange={(e) => setPrHeadBranch(e.target.value)}
+                  spellCheck={false}
+                />
+              </div>
+            </div>
+
+            <label className="gh-label" htmlFor="gh-pr-title">PR Title</label>
+            <input
+              id="gh-pr-title"
+              type="text"
+              className="gh-input"
+              placeholder="docs: update documentation"
+              value={prTitle}
+              onChange={(e) => setPrTitle(e.target.value)}
+            />
+
+            <label className="gh-label" htmlFor="gh-pr-body">PR Description (Markdown)</label>
+            <textarea
+              id="gh-pr-body"
+              className="gh-input gh-textarea"
+              rows={3}
+              value={prBody}
+              onChange={(e) => setPrBody(e.target.value)}
+            />
+
+            <div className="gh-diff-toggle-row">
+              <button
+                type="button"
+                className="gh-diff-toggle-btn"
+                onClick={() => setShowPrDiff((v) => !v)}
+              >
+                <DiffIcon size={14} />
+                <span>{showPrDiff ? 'Hide Diff Review' : 'Review Changes before Opening PR'}</span>
+              </button>
+            </div>
+            {showPrDiff && (
+              <div className="gh-modal-diff-wrapper">
+                <DiffViewer
+                  original={originalContent || ''}
+                  modified={markdown}
+                  filename={prPath || 'document.md'}
+                />
+              </div>
+            )}
+
+            {prError && <p className="gh-error-msg">{prError}</p>}
+            {prResult && (
+              <div className="gh-success-card">
+                <CheckCircleIcon size={18} />
+                <div>
+                  <strong>Pull Request #{prResult.prNumber} created!</strong>
+                  {prResult.htmlUrl && (
+                    <a
+                      href={prResult.htmlUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="gh-result-link"
+                    >
+                      View PR on GitHub →
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
+
+            <div className="gh-preview-actions">
+              <button
+                type="button"
+                className="gh-primary-btn"
+                onClick={handleCreatePR}
+                disabled={prLoading || !githubUser}
+              >
+                {prLoading ? <span className="gh-spinner" /> : <GitPullRequestIcon size={15} />}
+                {prLoading ? 'Creating PR…' : 'Create Pull Request'}
+              </button>
+              <button
+                type="button"
+                className="gh-secondary-btn"
+                onClick={onClose}
+              >
+                {prResult ? 'Done' : 'Cancel'}
               </button>
             </div>
           </div>
